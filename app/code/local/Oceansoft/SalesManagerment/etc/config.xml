@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+<config>
+    <modules>
+        <Oceansoft_SalesManagerment>
+            <version>0.1.0</version>
+        </Oceansoft_SalesManagerment>
+    </modules>
+
+    <global>
+        <models>
+            <salesmanagerment>
+                <class>Oceansoft_SalesManagerment_Model</class>
+                <resourceModel>salesmanagerment_mysql4</resourceModel>
+            </salesmanagerment>
+
+            <salesmanagerment_mysql4>
+                <class>Oceansoft_SalesManagerment_Model_Mysql4</class>
+                <entities>
+                    <checklist>
+                        <table>oceansoft_sales_checklist</table>
+                    </checklist>
+                </entities>
+            </salesmanagerment_mysql4>
+        </models>
+
+        <resources>
+            <salesmanagerment_setup>
+                <setup>
+                    <module>Oceansoft_SalesManagerment</module>
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </salesmanagerment_setup>
+        </resources>
+
+        <blocks>
+            <salesmanagerment>
+                <class>Oceansoft_SalesManagerment_Block</class>
+            </salesmanagerment>
+        </blocks>
+
+        <helpers>
+            <salesmanagerment>
+                <class>Oceansoft_SalesManagerment_Helper</class>
+            </salesmanagerment>
+        </helpers>
+    </global>
+
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Oceansoft_SalesManagerment before="Mage_Adminhtml">Oceansoft_SalesManagerment_Adminhtml</Oceansoft_SalesManagerment>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+
+    <adminhtml>
+        <layout>
+            <updates>
+                <salesmanagerment>
+                    <file>salesmanagerment.xml</file>
+                </salesmanagerment>
+            </updates>
+        </layout>
+    </adminhtml>
+
+</config>

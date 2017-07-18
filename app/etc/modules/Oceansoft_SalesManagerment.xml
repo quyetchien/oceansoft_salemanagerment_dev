@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<config>
+    <modules>
+        <Oceansoft_SalesManagerment>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Oceansoft_SalesManagerment>
+    </modules>
+</config>

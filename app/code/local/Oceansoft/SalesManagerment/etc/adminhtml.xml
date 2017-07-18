@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <salesmanagerment module="salesmanagerment" translate="title">
+            <title>Ocean Sales</title>
+            <sort_order>69</sort_order>
+            <children>
+                <saleschecklist translate="title" module="salesmanagerment">
+                    <title>Sales Check List</title>
+                    <action>adminhtml/osmanage_saleschecklist</action>
+                </saleschecklist>
+                <configuration translate="title" module="salesmanagerment">
+                    <title>Configuration</title>
+                    <action>adminhtml/system_config/edit/section/salesmanagerment</action>
+                </configuration>
+            </children>
+        </salesmanagerment>
+    </menu>
+
+    <acl>
+        <resources>
+            <all>
+                <title>Allow Everything</title>
+            </all>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <salesmanagerment module="salesmanagerment" translate="title">
+                                        <title>Ocean Sales</title>
+                                        <sort_order>71</sort_order>
+                                    </salesmanagerment>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                    <salesmanagerment module="salesmanagerment" translate="title">
+                        <title>Ocean Sales</title>
+                        <sort_order>71</sort_order>
+                        <children>
+                            <saleschecklist module="salesmanagerment" translate="title">
+                                <title>Sales Check List</title>
+                                <sort_order>10</sort_order>
+                            </saleschecklist>
+                            <configuration module="salesmanagerment" translate="title">
+                                <title>Configuration</title>
+                                <sort_order>10</sort_order>
+                            </configuration>
+                        </children>
+                    </salesmanagerment>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>
