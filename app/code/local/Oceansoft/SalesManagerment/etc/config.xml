@@ -20,6 +20,9 @@
                     <checklist>
                         <table>oceansoft_sales_checklist</table>
                     </checklist>
+                    <checklistgroup>
+                        <table>oceansoft_sales_checklist_group</table>
+                    </checklistgroup>
                 </entities>
             </salesmanagerment_mysql4>
         </models>

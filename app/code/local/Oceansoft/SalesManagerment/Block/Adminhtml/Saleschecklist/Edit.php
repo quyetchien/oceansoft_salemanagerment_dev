@@ -4,7 +4,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit extends Mag
     public function __construct()
     {
         parent::__construct();
-        $this->_objectId = 'id';
+        $this->_objectId = 'checklist_id';
         $this->_blockGroup = 'salesmanagerment';
         $this->_controller = 'adminhtml_saleschecklist';
         $this->_updateButton('save', 'label','Save Note');
@@ -14,7 +14,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit extends Mag
 
     public function getHeaderText()
     {
-        if( Mage::registry('salesmanagerment_data') && Mage::registry('salesmanagerment_data')->getId() )
+        if( Mage::registry('salesmanagerment_data') && Mage::registry('salesmanagerment_data')->getChecklistId() )
         {
             return 'Edit Note Order Id '.$this->htmlEscape( Mage::registry('salesmanagerment_data')->getOrderId() );
         }

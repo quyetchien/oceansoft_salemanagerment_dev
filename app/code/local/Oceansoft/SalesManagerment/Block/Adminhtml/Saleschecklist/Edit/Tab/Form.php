@@ -13,7 +13,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
             array(
                 'label' => 'Time',
                 'class' => 'required-entry',
-                'required' => true,
+                'required' => false,
                 'input_format' => $dateFormatIso,
                 'format'       => $dateFormatIso,
                 'time'      => true,
@@ -31,26 +31,38 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
             array(
                 'label' => 'Ticket Id',
                 'class' => 'required-entry',
-                'required' => true,
+                'required' => false,
                 'name' => 'ticket_id',
             ));
+
         // custom field group
-        $groupSales_field = $fieldset->addField('group', 'text', array(
+        $fieldset->addField('group', 'text', array(
             'name'      => 'group',
             'label'     => 'Group',
             'required'  => false,
         ));
-
         $group_sale = $form->getElement('group');
-
         $group_sale->setRenderer(
             $this->getLayout()->createBlock('salesmanagerment/adminhtml_saleschecklist_edit_renderer_group')
         );
+        //
+        $fieldset->addField('note', 'textarea',
+            array(
+                'label' => 'Note',
+                'class' => 'required-entry',
+                'name' => 'note',
+            ));
+        $fieldset->addField('refund', 'text',
+            array(
+                'label' => 'Refunded',
+                'class' => 'required-entry',
+                'required' => false,
+                'name' => 'refund',
+            ));
 
-
-        if ( Mage::registry('rewardpointscronemails_data') )
+        if ( Mage::registry('salesmanagerment_data') )
         {
-            $form->setValues(Mage::registry('rewardpointscronemails_data')->getData());
+            $form->setValues(Mage::registry('salesmanagerment_data')->getData());
         }
 
         return parent::_prepareForm();

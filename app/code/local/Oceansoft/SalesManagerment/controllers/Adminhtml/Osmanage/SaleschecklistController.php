@@ -26,7 +26,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
 
     public function editAction()
     {
-        $checkListId = $this->getRequest()->getParam('id');
+        $checkListId = $this->getRequest()->getParam('checklist_id');
         $checkListModel = Mage::getModel('salesmanagerment/checklist')->load($checkListId);
 
         if ($checkListModel->getId() || $checkListId == 0)
@@ -50,6 +50,67 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
             $this->_redirect('*/*/');
         }
     }
+
+    public function saveAction()
+    {
+        if ($this->getRequest()->getPost()) {
+            try {
+                $postData = $this->getRequest()->getPost();
+                $checkListModel = Mage::getModel('salesmanagerment/checklist');
+                $checklist_id = $this->getRequest()->getParam('checklist_id');
+                if ($checklist_id <= 0) {
+//                    $emailModel->setIsRunning(0);
+//                    $emailModel->setLastRewardId(0);
+//                    $emailModel->setCreatedTime( Mage::getSingleton('core/date')->gmtDate() );
+//                    $emailModel
+//                        ->addData($postData)
+//                        ->setUpdateTime( Mage::getSingleton('core/date')->gmtDate())
+//                        ->setId($this->getRequest()->getParam('id'))
+//                        ->save();
+//
+//                    Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
+//                    Mage::getSingleton('adminhtml/session')->setFormData(false);
+//                    $this->_redirect('*/*/');
+//                    return;
+                } else {
+                    // update oceansoft_sales_checklist_group
+                    $groupCollection = Mage::getModel('salesmanagerment/checklistgroup')->getCollection()
+                        ->addFieldToFilter('checklist_id', $checklist_id);
+                    foreach ($groupCollection as $group_collection) {
+                        $group_collection->delete();
+                    }
+                    if ($postData['group'] && isset($postData['group']['value'])) {
+                        foreach ($postData['group']['value'] as $data_group) {
+                            $groupModel = Mage::getModel('salesmanagerment/checklistgroup');
+                            $groupModel->setChecklistId($checklist_id);
+                            $groupModel->setSaleName($data_group['salename']);
+                            $groupModel->setValue($data_group['salevalue']);
+                            $groupModel->save();
+                        }
+                    }
+                    // update oceansoft_sales_checklist
+                    $checklistData = $postData;
+                    unset($checklistData['group']);
+                    $checkListModel->addData($checklistData)
+                        ->setChecklistId($checklist_id)
+                        ->save();
+                }
+
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
+                $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                return;
+            }
+            $this->_redirect('*/*/');
+        }
+    }
+
+    public function newAction()
+    {
+        $this->_forward('edit');
+    }
+
 
     /**
      * Check currently called action by permissions for current user

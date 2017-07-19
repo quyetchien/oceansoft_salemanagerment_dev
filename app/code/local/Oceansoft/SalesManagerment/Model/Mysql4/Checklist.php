@@ -3,6 +3,6 @@ class Oceansoft_SalesManagerment_Model_Mysql4_Checklist extends Mage_Core_Model_
 {
     protected function _construct()
     {
-        $this->_init('salesmanagerment/checklist', 'id');
+        $this->_init('salesmanagerment/checklist', 'checklist_id');
     }
 }
