@@ -4,7 +4,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
     public function __construct()
     {
         parent::__construct();
-        $this->setDefaultSort('checklist_id');
+        $this->setDefaultSort('id');
         $this->setId('sales_checklist_grid');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
@@ -21,12 +21,12 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
     {
         $store = Mage::app()->getStore();
         // Add the columns that should appear in the grid
-        $this->addColumn('checklist_id',
+        $this->addColumn('id',
             array(
                 'header'=> $this->__('ID'),
                 'align' =>'right',
                 'width' => '50px',
-                'index' => 'checklist_id'
+                'index' => 'id'
             )
         );
 
@@ -70,7 +70,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
         $this->addColumn('group',
             array(
                 'header'=> $this->__('Group'),
-                'renderer'  => 'salesmanagerment/adminhtml_saleschecklist_render_refund',
+                'renderer'  => 'salesmanagerment/adminhtml_saleschecklist_render_group',
             )
         );
 
@@ -88,6 +88,6 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
     public function getRowUrl($row)
     {
         // This is where our row data will link to
-        return $this->getUrl('*/*/edit', array('checklist_id' => $row->getChecklistId()));
+        return $this->getUrl('*/*/edit', array('id' => $row->getId()));
     }
 }

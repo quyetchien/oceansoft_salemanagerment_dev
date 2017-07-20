@@ -6,7 +6,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Form extend
         $form = new Varien_Data_Form(
             array(
                 'id' => 'edit_form',
-                'action' => $this->getUrl('*/*/save', array('checklist_id' => $this->getRequest()->getParam('checklist_id'))
+                'action' => $this->getUrl('*/*/save', array('id' => $this->getRequest()->getParam('id'))
                 ),
                 'method' => 'post',
             )

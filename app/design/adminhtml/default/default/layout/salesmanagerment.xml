@@ -5,4 +5,10 @@
             <block type="salesmanagerment/adminhtml_saleschecklist" name="saleschecklist"/>
         </reference>
     </adminhtml_osmanage_saleschecklist_index>
+
+    <adminhtml_osmanage_config_index>
+        <reference name="content">
+            <block type="salesmanagerment/adminhtml_configuration" name="configuration"/>
+        </reference>
+    </adminhtml_osmanage_config_index>
 </layout>

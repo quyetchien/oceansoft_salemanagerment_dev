@@ -6,7 +6,7 @@ $installer->startSetup();
 
 $installer->run("
 CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/checklist')}` (
-  `checklist_id` int(11) NOT NULL PRIMARY KEY auto_increment,
+  `id` int(11) NOT NULL PRIMARY KEY auto_increment,
   `order_id` varchar(50) NOT NULL,
   `customer_email` varchar(255) NOT NULL,
   `ticket_id` varchar(255) NOT NULL,
@@ -22,10 +22,18 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/checklistgroup')}
   `group_id` int(11) NOT NULL PRIMARY KEY auto_increment,
   `checklist_id` int(11),
   `user_id` int(11) NOT NULL,
-  `sale_name` varchar(255) NOT NULL,
   `value` int(11),
-  FOREIGN KEY (checklist_id) REFERENCES {$this->getTable('salesmanagerment/checklist')}(checklist_id)
+  FOREIGN KEY (checklist_id) REFERENCES {$this->getTable('salesmanagerment/checklist')}(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/oceansaleconfig')}` (
+  `id` int(11) NOT NULL PRIMARY KEY auto_increment,
+  `user_id` int(11) NOT NULL,
+  `revenue` int(11),
+  `from` datetime NULL,
+  `to` datetime NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ");
 
 $installer->endSetup();

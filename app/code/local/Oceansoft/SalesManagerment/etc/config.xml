@@ -23,6 +23,9 @@
                     <checklistgroup>
                         <table>oceansoft_sales_checklist_group</table>
                     </checklistgroup>
+                    <oceansaleconfig>
+                        <table>oceansoft_sales_configuration</table>
+                    </oceansaleconfig>
                 </entities>
             </salesmanagerment_mysql4>
         </models>

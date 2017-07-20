@@ -3,6 +3,7 @@
 class Oceansoft_SalesManagerment_Helper_Data extends Mage_Core_Helper_Abstract
 {
     const USER_ROLE = 'Sale';
+
     public function getSaleUser(){
         $model = Mage::getModel('admin/role');
         $role = $model->getCollection()
@@ -27,4 +28,10 @@ class Oceansoft_SalesManagerment_Helper_Data extends Mage_Core_Helper_Abstract
         }
         return $output;
     }
+
+    public function getUserNameById($user_id){
+        $user = Mage::getModel('admin/user')->load($user_id);
+        return $user->getUsername();
+    }
+
 }

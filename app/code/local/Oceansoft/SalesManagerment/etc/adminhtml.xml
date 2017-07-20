@@ -11,7 +11,7 @@
                 </saleschecklist>
                 <configuration translate="title" module="salesmanagerment">
                     <title>Configuration</title>
-                    <action>adminhtml/system_config/edit/section/salesmanagerment</action>
+                    <action>adminhtml/osmanage_config</action>
                 </configuration>
             </children>
         </salesmanagerment>

@@ -5,21 +5,10 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
     protected function _prepareForm()
     {
         $form = new Varien_Data_Form();
-        $dateFormatIso = Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT);
         $this->setForm($form);
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
-        $fieldset->addField('order_date', 'date',
-            array(
-                'label' => 'Time',
-                'class' => 'required-entry',
-                'required' => false,
-                'input_format' => $dateFormatIso,
-                'format'       => $dateFormatIso,
-                'time'      => true,
-                'image'     =>  $this->getSkinUrl('images/grid-cal.gif'),
-                'name' => 'order_date',
-            ));
+
         $fieldset->addField('order_id', 'text',
             array(
                 'label' => 'Order Id',
