@@ -1,7 +1,7 @@
 <?php
 
-class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mage_Adminhtml_Controller_Action {
-
+class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mage_Adminhtml_Controller_Action
+{
     public function indexAction()
     {
         $this->_initAction()
@@ -20,7 +20,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mag
         $this->loadLayout()
             ->_setActiveMenu('salesmanagerment/salesreport')
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('Ocean Sales Report'), Mage::helper('adminhtml')->__('Ocean Sales Report')
+                Mage::helper('adminhtml')->__('Sales Report'), Mage::helper('adminhtml')->__('Sales Report')
             );
         return $this;
     }
@@ -30,9 +30,9 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mag
      */
     public function exportCsvAction()
     {
-        $fileName   = 'salesreport.csv';
+        $fileName   = 'customersreport.csv';
         $content    = $this->getLayout()
-            ->createBlock('salesmanagerment/adminhtml_salesreport_grid')
+            ->createBlock('rewardpointsreport/adminhtml_customer_grid')
             ->getCsv();
         $this->_prepareDownloadResponse($fileName, $content);
     }
@@ -42,9 +42,9 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mag
      */
     public function exportXmlAction()
     {
-        $fileName   = 'salesreport.xml';
+        $fileName   = 'customersreport.xml';
         $content    = $this->getLayout()
-            ->createBlock('salesmanagerment/adminhtml_salesreport_grid')
+            ->createBlock('rewardpointsreport/adminhtml_customer_grid')
             ->getXml();
         $this->_prepareDownloadResponse($fileName, $content);
     }
@@ -54,9 +54,9 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mag
      */
     public function exportExcelAction()
     {
-        $fileName   = 'salesreport.xml';
+        $fileName   = 'customersreport.xml';
         $content    = $this->getLayout()
-            ->createBlock('salesmanagerment/adminhtml_salesreport_grid')
+            ->createBlock('rewardpointsreport/adminhtml_customer_grid')
             ->getExcelFile();
         $this->_prepareDownloadResponse($fileName, $content);
     }
@@ -68,6 +68,6 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ReportController extends Mag
      */
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('salesmanagerment/salesreport');
+        return Mage::getSingleton('admin/session')->isAllowed('rewardpoints/reports');
     }
 }

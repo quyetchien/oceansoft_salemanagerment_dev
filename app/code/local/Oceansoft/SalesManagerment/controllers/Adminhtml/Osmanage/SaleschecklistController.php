@@ -80,9 +80,12 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                             ->setCreatedAt( Mage::getSingleton('core/date')->gmtDate())
                             ->setUser($user_id)
                             ->save();
+                        $checklistIdIpt = $checkListModel->getId();
+
+                        // insert oceansoft_sales_report
+                        $this->_importSalesReportTable($user_id, $dataExt['price'], $checklistIdIpt, Mage::getSingleton('core/date')->gmtDate());
 
                         // insert oceansoft_sales_checklist_group
-                        $checklistIdIpt = $checkListModel->getId();
                         if($checklistIdIpt){
                             if ($checklistGroup) {
                                 foreach ($checklistGroup as $data_group) {
@@ -207,6 +210,15 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
             'price' => $myPrice,
             'order_date' => $order->getCreatedAt()
         );
+    }
+
+    protected function _importSalesReportTable($user_id, $price, $checklist_id, $created_at){
+        $reportModel = Mage::getModel('salesmanagerment/salesreport');
+        $reportModel->setUserId($user_id);
+        $reportModel->setPrice($price);
+        $reportModel->setChecklistId($checklist_id);
+        $reportModel->setCreatedAt($created_at);
+        $reportModel->save();
     }
 
     /**
