@@ -14,12 +14,14 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/checklist')}` (
   `refund` int(11),
   `note` text,
   `order_date` datetime NULL,
-  `created_at` datetime NULL
+  `created_at` datetime NULL,
+  `user` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/checklistgroup')}` (
   `group_id` int(11) NOT NULL PRIMARY KEY auto_increment,
   `checklist_id` int(11),
+  `user_id` int(11) NOT NULL,
   `sale_name` varchar(255) NOT NULL,
   `value` int(11),
   FOREIGN KEY (checklist_id) REFERENCES {$this->getTable('salesmanagerment/checklist')}(checklist_id)
