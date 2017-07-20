@@ -34,6 +34,14 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/oceansaleconfig')
   `to` datetime NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/oceansaleconfig')}` (
+  `id` int(11) NOT NULL PRIMARY KEY auto_increment,
+  `user_id` int(11) NOT NULL,
+  `revenue` int(11),
+  `from` datetime NULL,
+  `to` datetime NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 ");
 
 $installer->endSetup();

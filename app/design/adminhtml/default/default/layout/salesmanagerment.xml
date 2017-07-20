@@ -11,4 +11,10 @@
             <block type="salesmanagerment/adminhtml_configuration" name="configuration"/>
         </reference>
     </adminhtml_osmanage_config_index>
+
+    <adminhtml_osmanage_report_index>
+        <reference name="content">
+            <block type="salesmanagerment/adminhtml_saleseport" name="saleseport"/>
+        </reference>
+    </adminhtml_osmanage_report_index>
 </layout>

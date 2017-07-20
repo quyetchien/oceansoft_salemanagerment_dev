@@ -26,6 +26,9 @@
                     <oceansaleconfig>
                         <table>oceansoft_sales_configuration</table>
                     </oceansaleconfig>
+                    <salesreport>
+                        <table>oceansoft_sales_report</table>
+                    </salesreport>
                 </entities>
             </salesmanagerment_mysql4>
         </models>
