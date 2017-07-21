@@ -63,27 +63,30 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                     $checklistGroup = $postData['group']['value'];
                 }
                 unset($checklistData['group']);
+                $user_id = 0;
+                $session = Mage::getSingleton('admin/session');
+                if($user = $session->getUser()){
+                    $user_id = $user->getUserId();
+                }
                 if ($checklist_id <= 0) {
                     $order = Mage::getModel('sales/order')->loadByIncrementId($checklistData['order_id']);
                     if($order->getData()){
-                        $dataExt = $this->_getDataByOrder($order, $checklistGroup);
-                        $user_id = 0;
-                        $session = Mage::getSingleton('admin/session');
-                        if($user = $session->getUser()){
-                            $user_id = $user->getUserId();
+                        $orderGrandTotal = $order->getGrandTotal();
+                        if($checklistData['refund'] > 0){
+                            $orderGrandTotal = $orderGrandTotal * (1 - ($checklistData['refund'] / 100));
                         }
+                        $dataExt = $this->_getDataByOrder($order, $checklistGroup, $orderGrandTotal);
                         $checkListModel
                             ->addData($checklistData)
                             ->setCustomerEmail($dataExt['customer_email'])
                             ->setPrice($dataExt['price'])
                             ->setOrderDate($dataExt['order_date'])
-                            ->setCreatedAt( Mage::getSingleton('core/date')->gmtDate())
                             ->setUser($user_id)
                             ->save();
                         $checklistIdIpt = $checkListModel->getId();
 
                         // insert oceansoft_sales_report
-                        $this->_importSalesReportTable($user_id, $dataExt['price'], $checklistIdIpt, Mage::getSingleton('core/date')->gmtDate());
+                        $this->_importSalesReportTable($user_id, $dataExt['price'], $checklistIdIpt, $checklistData['created_at']);
 
                         // insert oceansoft_sales_checklist_group
                         if($checklistIdIpt){
@@ -94,6 +97,8 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                                     $groupModel->setUserId($data_group['saleid']);
                                     $groupModel->setValue($data_group['salevalue']);
                                     $groupModel->save();
+                                    $user_group_price = $orderGrandTotal * $data_group['salevalue'] / 100;
+                                    $this->_importSalesReportTable($data_group['saleid'], $user_group_price, $checklistIdIpt, $checklistData['created_at']);
                                 }
                             }
                         }
@@ -108,49 +113,59 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                         return;
                     }
                 }else{
-                    // update oceansoft_sales_checklist_group
-                    $groupCollection = Mage::getModel('salesmanagerment/checklistgroup')->getCollection()
-                        ->addFieldToFilter('checklist_id', $checklist_id);
-                    foreach ($groupCollection as $group_collection) {
-                        $group_collection->delete();
-                    }
-                    if ($checklistGroup) {
-                        foreach ($checklistGroup as $data_group) {
-                            $groupModel = Mage::getModel('salesmanagerment/checklistgroup');
-                            $groupModel->setChecklistId($checklist_id);
-                            $groupModel->setUserId($data_group['saleid']);
-                            $groupModel->setValue($data_group['salevalue']);
-                            $groupModel->save();
+                    $order = Mage::getModel('sales/order')->loadByIncrementId($checklistData['order_id']);
+                    if($order->getData()){
+                        $orderGrandTotal = $order->getGrandTotal();
+                        if($checklistData['refund'] > 0){
+                            $orderGrandTotal = $orderGrandTotal * (1 - ($checklistData['refund'] / 100));
                         }
-                    }
+                        $dataExt = $this->_getDataByOrder($order, $checklistGroup, $orderGrandTotal);
 
-                    // update oceansoft_sales_checklist
-                    $dataExt = array();
-                    $checkListOrderId = Mage::getModel('salesmanagerment/checklist')->load($checklist_id)->getOrderId();
-                    if($checklistData['order_id'] != $checkListOrderId){
-                        $order = Mage::getModel('sales/order')->loadByIncrementId($checklistData['order_id']);
-                        if($order->getData()){
-                            $dataExt = $this->_getDataByOrder($order, $checklistGroup);
-                        }else{
-                            Mage::getSingleton('adminhtml/session')->addError('Order not existed');
-                            Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                            $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
-                            return;
+                        // delete oceansoft_sales_report, oceansoft_sales_checklist_group
+                        $reportCollection = Mage::getModel('salesmanagerment/salesreport')->getCollection()
+                            ->addFieldToFilter('checklist_id', $checklist_id);
+                        foreach ($reportCollection as $report_collection) {
+                            $report_collection->delete();
                         }
-                    }
-                    $checkListModel->load($checklist_id)->addData($checklistData)->setId($checklist_id);
-                    if($dataExt){
-                        $checkListModel
+                        $groupCollection = Mage::getModel('salesmanagerment/checklistgroup')->getCollection()
+                            ->addFieldToFilter('checklist_id', $checklist_id);
+                        foreach ($groupCollection as $group_collection) {
+                            $group_collection->delete();
+                        }
+
+                        // update oceansoft_sales_checklist
+                        $checkListModel->load($checklist_id)->addData($checklistData)
                             ->setCustomerEmail($dataExt['customer_email'])
                             ->setPrice($dataExt['price'])
-                            ->setOrderDate($dataExt['order_date']);
-                    }
-                    $checkListModel->save();
+                            ->setOrderDate($dataExt['order_date'])
+                            ->setId($checklist_id)
+                            ->save();
 
-                    Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
-                    Mage::getSingleton('adminhtml/session')->setFormData(false);
-                    $this->_redirect('*/*/');
-                    return;
+                        $this->_importSalesReportTable($user_id, $dataExt['price'], $checklist_id, $checklistData['created_at']);
+
+                        // update oceansoft_sales_checklist_group
+                        if ($checklistGroup) {
+                            foreach ($checklistGroup as $data_group) {
+                                $groupModel = Mage::getModel('salesmanagerment/checklistgroup');
+                                $groupModel->setChecklistId($checklist_id);
+                                $groupModel->setUserId($data_group['saleid']);
+                                $groupModel->setValue($data_group['salevalue']);
+                                $groupModel->save();
+                                $user_group_price = $orderGrandTotal * $data_group['salevalue'] / 100;
+                                $this->_importSalesReportTable($data_group['saleid'], $user_group_price, $checklist_id, $checklistData['created_at']);
+                            }
+                        }
+
+                        Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
+                        Mage::getSingleton('adminhtml/session')->setFormData(false);
+                        $this->_redirect('*/*/');
+                        return;
+                    }else{
+                        Mage::getSingleton('adminhtml/session')->addError('Order not existed');
+                        Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
+                        $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                        return;
+                    }
                 }
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -189,9 +204,8 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
     }
 
 
-    protected function _getDataByOrder($order, $checklistGroup){
+    protected function _getDataByOrder($order, $checklistGroup, $orderGrandTotal){
         $customer_email = $order->getCustomerEmail();
-        $grand_total = $order->getGrandTotal();
         $myPercent = 100;
         if($checklistGroup){
             foreach($checklistGroup as $group){
@@ -201,7 +215,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
             }
         }
         if($myPercent > 0){
-            $myPrice = $grand_total * $myPercent / 100;
+            $myPrice = $orderGrandTotal * $myPercent / 100;
         }else{
             $myPrice = 0;
         }

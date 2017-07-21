@@ -9,6 +9,15 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
+        $fieldset->addField('from', 'date',
+            array(
+                'label'     => 'From',
+                'required'  => true,
+                'name'      => 'from',
+                'time'      => true,
+                'format'    => $this->escDates(),
+                'image'     => $this->getSkinUrl('images/grid-cal.gif')
+            ));
         $fieldset->addField('order_id', 'text',
             array(
                 'label' => 'Order Id',
@@ -55,6 +64,10 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         }
 
         return parent::_prepareForm();
+    }
+
+    private function escDates() {
+        return 'yyyy-MM-dd HH:mm:ss';
     }
 
 }
