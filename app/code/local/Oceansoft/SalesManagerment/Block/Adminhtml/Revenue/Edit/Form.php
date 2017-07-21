@@ -1,5 +1,5 @@
 <?php
-class Oceansoft_SalesManagerment_Block_Adminhtml_Configuration_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
+class Oceansoft_SalesManagerment_Block_Adminhtml_Revenue_Edit_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     protected function _prepareForm()
     {

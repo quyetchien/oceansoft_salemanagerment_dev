@@ -34,4 +34,21 @@ class Oceansoft_SalesManagerment_Helper_Data extends Mage_Core_Helper_Abstract
         return $user->getUsername();
     }
 
+    public function createPickerTime( $default = '19:00', $interval = '+1 minutes') {
+
+        $output = '';
+        $current = strtotime( '00:00' );
+        $end = strtotime( '23:59' );
+
+        while( $current <= $end ) {
+            $time = date( 'H:i', $current );
+            $sel = ( $time == $default ) ? ' selected' : '';
+
+            $output .= "<option value=\"{$time}\"{$sel}>" . date( 'H:i', $current ) .'</option>';
+            $current = strtotime( $interval, $current );
+        }
+
+        return $output;
+    }
+
 }

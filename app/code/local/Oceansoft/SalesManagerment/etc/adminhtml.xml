@@ -9,10 +9,10 @@
                     <title>Sales Check List</title>
                     <action>adminhtml/osmanage_saleschecklist</action>
                 </saleschecklist>
-                <configuration translate="title" module="salesmanagerment">
-                    <title>Configuration</title>
-                    <action>adminhtml/osmanage_config</action>
-                </configuration>
+                <revenue translate="title" module="salesmanagerment">
+                    <title>Revenue</title>
+                    <action>adminhtml/osmanage_revenue</action>
+                </revenue>
                 <salesreport translate="title" module="salesmanagerment">
                     <title>Sales Report</title>
                     <action>adminhtml/osmanage_report</action>

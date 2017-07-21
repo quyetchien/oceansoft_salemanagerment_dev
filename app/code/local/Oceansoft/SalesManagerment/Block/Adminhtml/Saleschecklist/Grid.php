@@ -78,7 +78,14 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             array(
                 'header'=> $this->__('Created At'),
                 'index' => 'created_at',
-                'type' => 'date',
+                'type' => 'datetime',
+            )
+        );
+
+        $this->addColumn('user',
+            array(
+                'header'=> $this->__('User'),
+                'renderer'  => 'salesmanagerment/adminhtml_saleschecklist_render_user',
             )
         );
 

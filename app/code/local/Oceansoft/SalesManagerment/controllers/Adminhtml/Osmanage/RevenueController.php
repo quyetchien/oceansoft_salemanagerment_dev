@@ -1,6 +1,6 @@
 <?php
 
-class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mage_Adminhtml_Controller_Action
+class Oceansoft_SalesManagerment_Adminhtml_Osmanage_RevenueController extends Mage_Adminhtml_Controller_Action
 {
     public function indexAction()
     {
@@ -18,9 +18,9 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mag
     protected function _initAction()
     {
         $this->loadLayout()
-            ->_setActiveMenu('salesmanagerment/configuration')
+            ->_setActiveMenu('salesmanagerment/revenue')
             ->_addBreadcrumb(
-                Mage::helper('adminhtml')->__('Ocean Sale Config'), Mage::helper('adminhtml')->__('Ocean Sale Config')
+                Mage::helper('adminhtml')->__('Ocean Sale Revenue'), Mage::helper('adminhtml')->__('Ocean Sale Revenue')
             );
         return $this;
     }
@@ -28,26 +28,26 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mag
     public function editAction()
     {
         $configId = $this->getRequest()->getParam('id');
-        $configModel = Mage::getModel('salesmanagerment/oceansaleconfig')->load($configId);
+        $configModel = Mage::getModel('salesmanagerment/revenue')->load($configId);
 
         if ($configModel->getId() || $configId == 0)
         {
             Mage::register('salesmanagerment_data', $configModel);
             $this->loadLayout();
-            $this->_setActiveMenu('salesmanagerment/configuration');
-            $this->_addBreadcrumb('Configuration Manager', 'Configuration Manager');
+            $this->_setActiveMenu('salesmanagerment/revenue');
+            $this->_addBreadcrumb('Revenue', 'Revenue');
             $this->getLayout()->getBlock('head')
                 ->setCanLoadExtJs(true);
             $this->_addContent($this->getLayout()
-                ->createBlock('salesmanagerment/adminhtml_configuration_edit'))
+                ->createBlock('salesmanagerment/adminhtml_revenue_edit'))
                 ->_addLeft($this->getLayout()
-                    ->createBlock('salesmanagerment/adminhtml_configuration_edit_tabs')
+                    ->createBlock('salesmanagerment/adminhtml_revenue_edit_tabs')
                 );
             $this->renderLayout();
         }
         else
         {
-            Mage::getSingleton('adminhtml/session')->addError('Config does not exist');
+            Mage::getSingleton('adminhtml/session')->addError('Revenue does not exist');
             $this->_redirect('*/*/');
         }
     }
@@ -63,11 +63,24 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mag
         {
             try {
                 $postData = $this->getRequest()->getPost();
-                $configModel = Mage::getModel('salesmanagerment/oceansaleconfig');
-
+                $revenueModel = Mage::getModel('salesmanagerment/revenue');
+                $rule = array();
+                if($postData['rule'] && $postData['rule']['value']){
+                    foreach($postData['rule']['value'] as $rule_value){
+                        $rule[] = array(
+                            'from' => $rule_value['rulefrom'],
+                            'to' => $rule_value['ruleto'],
+                            'value' => $rule_value['rulevalue']
+                        );
+                    }
+                }
+                $rule = serialize($rule);
+                $revenueData = $postData;
+                unset($revenueData['rule']);
                 if( $this->getRequest()->getParam('id') <= 0 ) {
-                    $configModel
-                        ->addData($postData)
+                    $revenueModel
+                        ->addData($revenueData)
+                        ->setRule($rule)
                         ->setId($this->getRequest()->getParam('id'))
                         ->save();
 
@@ -76,7 +89,8 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mag
                     $this->_redirect('*/*/');
                     return;
                 }else{
-                    $configModel->addData($postData)
+                    $revenueModel->addData($revenueData)
+                        ->setRule($rule)
                         ->setId($this->getRequest()->getParam('id'))
                         ->save();
                 }
@@ -98,8 +112,8 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mag
         {
             try
             {
-                $configModel = Mage::getModel('salesmanagerment/oceansaleconfig');
-                $configModel->setId($this->getRequest()->getParam('id'))->delete();
+                $revenueModel = Mage::getModel('salesmanagerment/revenue');
+                $revenueModel->setId($this->getRequest()->getParam('id'))->delete();
                 Mage::getSingleton('adminhtml/session')->addSuccess('successfully deleted');
                 $this->_redirect('*/*/');
             }
@@ -119,6 +133,6 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_ConfigController extends Mag
      */
     protected function _isAllowed()
     {
-        return Mage::getSingleton('admin/session')->isAllowed('salesmanagerment/configuration');
+        return Mage::getSingleton('admin/session')->isAllowed('salesmanagerment/revenue');
     }
 }

@@ -5,15 +5,15 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Render_Group ext
     public function render(Varien_Object $row)
     {
         $result = '';
-        $groupCollection = Mage::getModel('salesmanagerment/checklistgroup')->getCollection()
-            ->addFieldToFilter('checklist_id', $row->getId());
-        if($groupData = $groupCollection->getData()){
+        $checklistCollection = Mage::getModel('salesmanagerment/checklist')->getCollection()
+            ->addFieldToFilter('order_id', $row->getOrderId());
+        if($groupData = $checklistCollection->getData()){
             foreach($groupData as $key => $group_data){
-                $user_name = Mage::helper('salesmanagerment')->getUserNameById($group_data['user_id']);
+                $user_name = Mage::helper('salesmanagerment')->getUserNameById($group_data['user']);
                 if($key == 0){
-                    $result .= $user_name . ": " . $group_data['value'] . '%';
+                    $result .= $user_name . ": " . $group_data['percentage'] . '%';
                 }else{
-                    $result .= "<br>" . $user_name . ": " . $group_data['value'] . '%';
+                    $result .= "<br>" . $user_name . ": " . $group_data['percentage'] . '%';
                 }
             }
         }

@@ -20,12 +20,9 @@
                     <checklist>
                         <table>oceansoft_sales_checklist</table>
                     </checklist>
-                    <checklistgroup>
-                        <table>oceansoft_sales_checklist_group</table>
-                    </checklistgroup>
-                    <oceansaleconfig>
-                        <table>oceansoft_sales_configuration</table>
-                    </oceansaleconfig>
+                    <revenue>
+                        <table>oceansoft_sales_revenue</table>
+                    </revenue>
                     <salesreport>
                         <table>oceansoft_sales_report</table>
                     </salesreport>

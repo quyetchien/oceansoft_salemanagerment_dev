@@ -1,18 +1,18 @@
 <?php
-class Oceansoft_SalesManagerment_Block_Adminhtml_Configuration_Grid extends Mage_Adminhtml_Block_Widget_Grid
+class Oceansoft_SalesManagerment_Block_Adminhtml_Revenue_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
     {
         parent::__construct();
         $this->setDefaultSort('id');
-        $this->setId('sales_coniguration_grid');
+        $this->setId('sales_revenue_grid');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
     }
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('salesmanagerment/oceansaleconfig')->getCollection();
+        $collection = Mage::getModel('salesmanagerment/revenue')->getCollection();
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -33,7 +33,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Configuration_Grid extends Mage
         $this->addColumn('user',
             array(
                 'header'=> $this->__('User'),
-                'renderer'  => 'salesmanagerment/adminhtml_configuration_render_user',
+                'renderer'  => 'salesmanagerment/adminhtml_revenue_render_user',
             )
         );
 

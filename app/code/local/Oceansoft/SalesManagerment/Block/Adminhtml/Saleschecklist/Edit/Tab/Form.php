@@ -9,11 +9,11 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
-        $fieldset->addField('from', 'date',
+        $fieldset->addField('created_at', 'date',
             array(
-                'label'     => 'From',
+                'label'     => 'Created At',
                 'required'  => true,
-                'name'      => 'from',
+                'name'      => 'created_at',
                 'time'      => true,
                 'format'    => $this->escDates(),
                 'image'     => $this->getSkinUrl('images/grid-cal.gif')
@@ -32,18 +32,13 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
                 'required' => false,
                 'name' => 'ticket_id',
             ));
-
-        // custom field group
-        $fieldset->addField('group', 'text', array(
-            'name'      => 'group',
-            'label'     => 'Group',
-            'required'  => false,
-        ));
-        $group_sale = $form->getElement('group');
-        $group_sale->setRenderer(
-            $this->getLayout()->createBlock('salesmanagerment/adminhtml_saleschecklist_edit_renderer_group')
-        );
-        //
+        $fieldset->addField('percentage', 'text',
+            array(
+                'label' => 'Your Percentage',
+                'class' => 'required-entry',
+                'required' => true,
+                'name' => 'percentage',
+            ));
         $fieldset->addField('note', 'textarea',
             array(
                 'label' => 'Note',

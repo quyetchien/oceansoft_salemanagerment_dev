@@ -1,6 +1,6 @@
 <?php
 
-class Oceansoft_SalesManagerment_Block_Adminhtml_Configuration_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form
+class Oceansoft_SalesManagerment_Block_Adminhtml_Revenue_Edit_Tab_Form extends Mage_Adminhtml_Block_Widget_Form
 {
     protected function _prepareForm()
     {
@@ -43,6 +43,16 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Configuration_Edit_Tab_Form ext
                 'image'     => $this->getSkinUrl('images/grid-cal.gif')
             ));
 
+        // custom field rule
+        $fieldset->addField('rule', 'text', array(
+            'name'      => 'rule',
+            'label'     => 'Rule',
+            'required'  => false,
+        ));
+        $rule_sale = $form->getElement('rule');
+        $rule_sale->setRenderer(
+            $this->getLayout()->createBlock('salesmanagerment/adminhtml_revenue_edit_renderer_rule')
+        );
 
         if ( Mage::registry('salesmanagerment_data') )
         {
