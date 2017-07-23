@@ -9,7 +9,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
-        $fieldset->addField('created_at', 'date',
+        $fieldset->addField('created_at', 'datetime',
             array(
                 'label'     => 'Created At',
                 'required'  => true,

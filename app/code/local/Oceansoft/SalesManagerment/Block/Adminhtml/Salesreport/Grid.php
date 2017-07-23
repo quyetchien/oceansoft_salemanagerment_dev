@@ -5,7 +5,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
     public function __construct()
     {
         parent::__construct();
-        $this->setId('sales_report_grid');
+        $this->setId('salesreportGrid');
         $this->setDefaultSort('user');
         $this->setDefaultDir('DESC');
         $this->setUseAjax(true);
@@ -15,7 +15,8 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getResourceModel('salesmanagerment/salesreport');
+        $collection = Mage::getModel('salesmanagerment/checklist')->getCollection();
+
         // Add Form Filter Data
         $filter = Mage::app()->getRequest()->getParam('filter', null);
         $data   = array();
@@ -39,144 +40,47 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
         $collection->getSelect()->reset(Zend_Db_Select::COLUMNS)
             ->columns(array(
                 'user_id'   => 'user',
-                'total_salary' => 'SUM(price)',
-                'order_base_amount' => 'order_base_amount',
-            ))->group(array('main_table.customer_id', 'main_table.order_id'));
-
-        // Fix for Refer Friend report
-        $collection->addFieldToFilter('main_table.action', array('nin' => array(
-            'referfriends', 'referfriends_cancel'
-        )));
-
-        /**
-         * @var string $viewSelect Use to Storeage a View of Report
-         */
-        $viewSelect = clone $collection->getSelect();
-        $collection->getSelect()->reset()
-            ->from(array('main_table' => new Zend_Db_Expr('(' . $viewSelect->__toString() . ')')), array(
-                'customer_id', 'customer_email'
-            ))
-            ->columns(array(
-                'earned_points'     => 'SUM(earned_points)',
-                'spent_points'      => 'SUM(spent_points)',
-                'total_discount'    => 'SUM(base_discount)',
-                'order_grand_total' => 'SUM(order_base_amount)'
-            ))->group('main_table.customer_id');
-
-        $viewSelect = clone $collection->getSelect();
-
-        // Change to Flat View - Can Filter and Search
-        $collection->getSelect()->reset()
-            ->from(array('main_table' => new Zend_Db_Expr('(' . $viewSelect->__toString() . ')')))
-            ->joinLeft(array('c' => $collection->getTable('rewardpoints/customer')),
-                'main_table.customer_id = c.customer_id',
-                array('point_balance', 'holding_balance')
-            );
+                'price' => 'SUM(price)',
+                'total_salary' => 'SUM(total_earn)',
+            ))->group(array('main_table.user'));
 
         $this->setCollection($collection);
         parent::_prepareCollection();
-
-        // Process Row Total
-        $viewSelect = clone $collection->getSelect();
-        $rowData = Mage::getResourceModel('rewardpoints/transaction')->getReadConnection()->fetchRow(
-            $viewSelect->reset(Zend_Db_Select::COLUMNS)
-                ->reset(Zend_Db_Select::ORDER)
-                ->reset(Zend_Db_Select::LIMIT_COUNT)
-                ->reset(Zend_Db_Select::LIMIT_OFFSET)
-                ->columns(array(
-                    'customer_email'    => 'COUNT(main_table.customer_id)',
-                    'point_balance'     => 'SUM(point_balance)',
-                    'holding_balance'   => 'SUM(holding_balance)',
-                    'earned_points'     => 'SUM(earned_points)',
-                    'spent_points'      => 'SUM(spent_points)',
-                    'total_discount'    => 'SUM(total_discount)',
-                    'order_grand_total' => 'SUM(order_grand_total)',
-                ))
-        );
-        // hiep fix 181114
-        $rowData['customer_id'] = 'Total';
-        if ($this->_isExport) {
-            $this->setCountTotals(true);
-            $this->setTotals(new Varien_Object($rowData));
-        } else {
-            $rowTotal = new Varien_Object($rowData);
-            foreach ($this->_columns as $_column) {
-                if (is_array($rowData) && isset($rowData[$_column->getIndex()])) {
-                    $_column->setHeader($_column->getHeader() . '<br/>('
-                        . $_column->getRowFieldExport($rowTotal) . ')');
-                } else {
-                    $_column->setHeader($_column->getHeader() . '<br/>&nbsp;');
-                }
-            }
-        }
-
         return $this;
     }
 
-    /**
-     * prepare columns for this grid
-     *
-     * @return Magestore_RewardPointsReport_Block_Adminhtml_Customer_Grid
-     */
+
     protected function _prepareColumns()
     {
-        $this->addColumn('customer_id', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('ID'),
+        $this->addColumn('user_id', array(
+            'header'    => Mage::helper('salesmanagerment')->__('User Id'),
             'align'     => 'right',
-            'width'     => '50px',
-            'index'     => 'customer_id',
+            'width'     => '10px',
+            'index'     => 'user_id',
             'type'      => 'text',
-            'totals_label'  => Mage::helper('rewardpointsreport')->__('Total'),
-            'filter_index'  => 'main_table.customer_id',
+            'totals_label'  => Mage::helper('salesmanagerment')->__('Total'),
         ));
 
-        $this->addColumn('customer_email', array(
-            'header'    => Mage::helper('rewardpointsreport')->__("Customer's Email"),
+        $this->addColumn('username', array(
+            'header'    => Mage::helper('salesmanagerment')->__('Username'),
+            'align'     => 'right',
+            'width'     => '100px',
+            'renderer'  => 'salesmanagerment/adminhtml_salesreport_render_user',
+        ));
+
+        $this->addColumn('price', array(
+            'header'    => Mage::helper('salesmanagerment')->__("Price"),
             'align'     => 'left',
-            'index'     => 'customer_email',
-            'filter_index'  => 'main_table.customer_email',
+            'index'     => 'price',
         ));
 
-        $this->addColumn('point_balance', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('Point Balance'),
-            'index'     => 'point_balance',
-            'type'      => 'number'
+        $this->addColumn('total_salary', array(
+            'header'    => Mage::helper('salesmanagerment')->__('Salary'),
+            'renderer'  => 'salesmanagerment/adminhtml_salesreport_render_salary',
         ));
 
-        $this->addColumn('holding_balance', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('Held-back Balance'),
-            'index'     => 'holding_balance',
-            'type'      => 'number'
-        ));
-
-        $this->addColumn('earned_points', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('Earned Points'),
-            'index'     => 'earned_points',
-            'type'      => 'number',
-        ));
-
-        $this->addColumn('spent_points', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('Spent Points'),
-            'index'     => 'spent_points',
-            'type'      => 'number',
-        ));
-
-        $this->addColumn('total_discount', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('Discount for Using Points'),
-            'index'     => 'total_discount',
-            'type'      => 'price',
-            'currency_code' => $this->_getStore()->getBaseCurrency()->getCode(),
-        ));
-
-        $this->addColumn('order_grand_total', array(
-            'header'    => Mage::helper('rewardpointsreport')->__('Total Of Orders Using Points'),
-            'index'     => 'order_grand_total',
-            'type'      => 'price',
-            'currency_code' => $this->_getStore()->getBaseCurrency()->getCode(),
-        ));
-
-        $this->addExportType('*/*/exportCsv', Mage::helper('rewardpointsreport')->__('CSV'));
-        $this->addExportType('*/*/exportXml', Mage::helper('rewardpointsreport')->__('XML'));
+        $this->addExportType('*/*/exportCsv', Mage::helper('salesmanagerment')->__('CSV'));
+        $this->addExportType('*/*/exportXml', Mage::helper('salesmanagerment')->__('XML'));
         $this->addExportType('*/*/exportExcel', Mage::helper('adminhtml')->__('Excel XML'));
 
         return parent::_prepareColumns();
@@ -193,10 +97,10 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
      *
      * @return string
      */
-    public function getRowUrl($row)
-    {
-        return $this->getUrl('adminhtml/customer/edit', array('id' => $row->getCustomerId()));
-    }
+//    public function getRowUrl($row)
+//    {
+//        return $this->getUrl('adminhtml/customer/edit', array('id' => $row->getCustomerId()));
+//    }
 
     /**
      * get grid url (use for ajax load)

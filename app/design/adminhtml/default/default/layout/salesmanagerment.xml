@@ -15,8 +15,13 @@
     <adminhtml_osmanage_report_index>
         <reference name="content">
             <block type="salesmanagerment/adminhtml_grid_container" name="salesmanagerment.salesreport" template="salesmanagerment/grid/daterange.phtml">
-                <block type="salesmanagerment/adminhtml_saleseport_grid" name="salesreport_content" as="salesreport_content" />
+                <block type="salesmanagerment/adminhtml_salesreport_grid" name="salesreport_content" as="salesreport_content" />
             </block>
         </reference>
     </adminhtml_osmanage_report_index>
+    <adminhtml_osmanage_report_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="salesmanagerment/adminhtml_salesreport_grid" name="salesreport_content" as="salesreport_content" />
+        </block>
+    </adminhtml_osmanage_report_grid>
 </layout>

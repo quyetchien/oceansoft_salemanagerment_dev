@@ -160,17 +160,69 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
             ->getCollection()
             ->addFieldToFilter('user_id', $user_id);
         if($user = $user_revenue->getData()){
-            $userRule = unserialize($user[0]['rule']);
-            echo "<pre>";
-            print_r($userRule);exit;
-            foreach($userRule as $rule){
-                if((strtotime($time) >= strtotime($rule['from'])) && (strtotime($time) <= strtotime($rule['to']))){
-                    echo $price * $rule['value'] / 100;exit;
-                    return $price * $rule['value'] / 100;
+            $user = $user[0];
+            if($time >= $user['from'] && $time <= $user['to']){
+                $userRule = unserialize($user['rule']);
+                foreach($userRule as $rule){
+                    if($this->_checkTimeInCondition($rule['from'], $rule['to'], $time)){
+                        return $price * $rule['value'] / 100;
+                    }
                 }
             }
         }
         return 0;
+    }
+
+    protected function _checkTimeInCondition($from, $to, $current){
+        $from = strtotime($from);
+        $to = strtotime($to);
+        $current = strtotime(date("H:i:s",strtotime($current)));
+        if($to < $from){
+            $to = $to + 86400;
+            if($current < $from){
+                $current = $current + 86400;
+            }
+        }
+        if($from <= $current && $current <= $to){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * export grid items to CSV file
+     */
+    public function exportCsvAction()
+    {
+        $fileName   = 'saleschecklist.csv';
+        $content    = $this->getLayout()
+            ->createBlock('salesmanagerment/adminhtml_saleschecklist_grid')
+            ->getCsv();
+        $this->_prepareDownloadResponse($fileName, $content);
+    }
+
+    /**
+     * export grid items to XML file
+     */
+    public function exportXmlAction()
+    {
+        $fileName   = 'saleschecklist.xml';
+        $content    = $this->getLayout()
+            ->createBlock('rewardpointsreport/adminhtml_saleschecklist_grid')
+            ->getXml();
+        $this->_prepareDownloadResponse($fileName, $content);
+    }
+
+    /**
+     * export grid items to XML Excel file
+     */
+    public function exportExcelAction()
+    {
+        $fileName   = 'saleschecklist.xml';
+        $content    = $this->getLayout()
+            ->createBlock('rewardpointsreport/adminhtml_saleschecklist_grid')
+            ->getExcelFile();
+        $this->_prepareDownloadResponse($fileName, $content);
     }
 
     /**

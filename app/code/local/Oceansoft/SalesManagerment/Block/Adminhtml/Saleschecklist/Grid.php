@@ -19,7 +19,6 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
 
     protected function _prepareColumns()
     {
-        $store = Mage::app()->getStore();
         // Add the columns that should appear in the grid
         $this->addColumn('id',
             array(
@@ -56,7 +55,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             array(
                 'header'=> $this->__('Price'),
                 'index' => 'price',
-                'type' => 'price',
+                'type' => 'number',
             )
         );
 
@@ -89,7 +88,18 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             )
         );
 
+        $this->addExportType('*/*/exportCsv', Mage::helper('salesmanagerment')->__('CSV'));
+        $this->addExportType('*/*/exportXml', Mage::helper('salesmanagerment')->__('XML'));
+        $this->addExportType('*/*/exportExcel', Mage::helper('adminhtml')->__('Excel XML'));
+
         return parent::_prepareColumns();
+    }
+
+    public function styleDate( $value,$row,$column,$isExport )
+    {
+        $locale = Mage::app()->getLocale();
+        $date = $locale->date( $value, $locale->getDateFormat(), $locale->getLocaleCode(), false )->toString( $locale->getDateFormat() ) ;
+        return $date;
     }
 
     public function getRowUrl($row)

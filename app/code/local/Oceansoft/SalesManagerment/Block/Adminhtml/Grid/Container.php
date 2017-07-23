@@ -32,7 +32,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Grid_Container extends Mage_Adm
      */
     public function getJsObjectName()
     {
-        $gridBlock = $this->getChild('grid_content');
+        $gridBlock = $this->getChild('salesreport_content');
         return $gridBlock ? $gridBlock->getJsObjectName() : '';
     }
 }
