@@ -55,7 +55,10 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
         if ($this->getRequest()->getPost()) {
             try {
                 $postData = $this->getRequest()->getPost();
+                $postDataGroup = $postData['group'];
+                unset($postData['group']);
                 $checkListModel = Mage::getModel('salesmanagerment/checklist');
+                $checkListCollection = $checkListModel->getCollection();
                 $checklist_id = $this->getRequest()->getParam('id');
                 $user_id = 0;
                 $session = Mage::getSingleton('admin/session');
@@ -63,22 +66,60 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                     $user_id = $user->getUserId();
                 }
                 if ($checklist_id <= 0) {
+                    // check order id existed
+                    $checkOrderCreated = $checkListCollection
+                        ->addFieldToFilter('order_id', $postData['order_id']);
+                    if($checkOrderCreated->getData()){
+                        Mage::getSingleton('adminhtml/session')->addError('Ticket with Order Id existed');
+                        Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
+                        $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                        return;
+                    }
+
                     $order = Mage::getModel('sales/order')->loadByIncrementId($postData['order_id']);
                     if($order->getData()){
                         $orderGrandTotal = $order->getGrandTotal();
                         if($postData['refund'] > 0){
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
                         }
-                        $price = $orderGrandTotal * $postData['percentage'] / 100;
-                        $total_earn = $this->_calculationEarnPrice($price, $postData['created_at'], $user_id);
+                        $myPercentage = $this->_getMyPercentage($postData, $postDataGroup);
+                        $myPrice = $orderGrandTotal * $myPercentage / 100;
+                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['created_at'], $user_id);
                         $checkListModel
                             ->addData($postData)
                             ->setCustomerEmail($order->getCustomerEmail())
-                            ->setPrice($price)
-                            ->setTotalEarn($total_earn)
+                            ->setPrice($myPrice)
                             ->setOrderDate($order->getCreatedAt())
                             ->setUser($user_id)
                             ->save();
+                        $checklist_id = $checkListModel->getId();
+                        if($checklist_id){
+                            // import report for me
+                            $this->_importSalesReport(array(
+                                'user_id' => $user_id,
+                                'value' => $myPercentage,
+                                'total_earn' => $total_earn,
+                                'order_id' => $postData['order_id'],
+                                'checklist_id' => $checklist_id,
+                                'created_at' => $postData['created_at']
+                            ));
+
+                            // import report for group
+                            if($postDataGroup && $postDataGroup['value']){
+                                foreach($postDataGroup['value'] as $post_group){
+                                    $group_price = $orderGrandTotal * $post_group['salevalue'] / 100;
+                                    $group_total_earn = $this->_calculationEarnPrice($group_price, $postData['created_at'], $post_group['saleid']);
+                                    $this->_importSalesReport(array(
+                                        'user_id' => $post_group['saleid'],
+                                        'value' => $post_group['salevalue'],
+                                        'total_earn' => $group_total_earn,
+                                        'order_id' => $postData['order_id'],
+                                        'checklist_id' => $checklist_id,
+                                        'created_at' => $postData['created_at']
+                                    ));
+                                }
+                            }
+                        }
                         Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
                         Mage::getSingleton('adminhtml/session')->setFormData(false);
                         $this->_redirect('*/*/');
@@ -96,17 +137,52 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                         if($postData['refund'] > 0){
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
                         }
-                        $price = $orderGrandTotal * $postData['percentage'] / 100;
-                        $total_earn = $this->_calculationEarnPrice($price, $postData['created_at'], $user_id);
+                        $myPercentage = $this->_getMyPercentage($postData, $postDataGroup);
+                        $myPrice = $orderGrandTotal * $myPercentage / 100;
+                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['created_at'], $user_id);
 
                         // update oceansoft_sales_checklist
                         $checkListModel->load($checklist_id)->addData($postData)
                             ->setCustomerEmail($order->getCustomerEmail())
-                            ->setPrice($price)
-                            ->setTotalEarn($total_earn)
+                            ->setPrice($myPrice)
                             ->setOrderDate($order->getCreatedAt())
                             ->setId($checklist_id)
                             ->save();
+
+                        //delete report
+                        $salesReportCollection = Mage::getModel('salesmanagerment/salesreport')->getCollection()
+                            ->addFieldToFilter('order_id', $postData['order_id']);
+                        if($salesReportCollection){
+                            foreach($salesReportCollection as $report_collection){
+                                $report_collection->delete();
+                            }
+                        }
+
+                        // import report for me
+                        $this->_importSalesReport(array(
+                            'user_id' => $user_id,
+                            'value' => $myPercentage,
+                            'total_earn' => $total_earn,
+                            'order_id' => $postData['order_id'],
+                            'checklist_id' => $checklist_id,
+                            'created_at' => $postData['created_at']
+                        ));
+
+                        // import report for group
+                        if($postDataGroup && $postDataGroup['value']){
+                            foreach($postDataGroup['value'] as $post_group){
+                                $group_price = $orderGrandTotal * $post_group['salevalue'] / 100;
+                                $group_total_earn = $this->_calculationEarnPrice($group_price, $postData['created_at'], $post_group['saleid']);
+                                $this->_importSalesReport(array(
+                                    'user_id' => $post_group['saleid'],
+                                    'value' => $post_group['salevalue'],
+                                    'total_earn' => $group_total_earn,
+                                    'order_id' => $postData['order_id'],
+                                    'checklist_id' => $checklist_id,
+                                    'created_at' => $postData['created_at']
+                                ));
+                            }
+                        }
 
                         Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
                         Mage::getSingleton('adminhtml/session')->setFormData(false);
@@ -187,6 +263,36 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
             return true;
         }
         return false;
+    }
+
+    protected function _importSalesReport($dataImport){
+        if(!$dataImport){
+            return false;
+        }
+        $salesReportModel = Mage::getModel('salesmanagerment/salesreport');
+        try{
+            $salesReportModel
+                ->addData($dataImport)
+                ->save();
+        }catch (Exception $e){
+            return false;
+        }
+        return true;
+    }
+
+    protected function _getMyPercentage($postData, $postDataGroup){
+        $result = 100;
+        if($postData['refund']){
+            $result -= $postData['refund'];
+        }
+        if($postDataGroup && $postDataGroup['value']){
+            foreach($postDataGroup['value'] as $post_group){
+                if($post_group['salevalue']){
+                    $result -= $post_group['salevalue'];
+                }
+            }
+        }
+        return $result;
     }
 
     /**

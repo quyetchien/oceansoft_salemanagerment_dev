@@ -28,27 +28,29 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset->addField('ticket_id', 'text',
             array(
                 'label' => 'Ticket Id',
-                'class' => 'required-entry',
                 'required' => false,
                 'name' => 'ticket_id',
             ));
-        $fieldset->addField('percentage', 'text',
-            array(
-                'label' => 'Your Percentage',
-                'class' => 'required-entry',
-                'required' => true,
-                'name' => 'percentage',
-            ));
+        // custom field group
+        $fieldset->addField('group', 'text', array(
+            'name'      => 'group',
+            'label'     => 'Group',
+            'required'  => false,
+        ));
+        $group_sale = $form->getElement('group');
+        $group_sale->setRenderer(
+            $this->getLayout()->createBlock('salesmanagerment/adminhtml_saleschecklist_edit_renderer_group')
+        );
+        //
         $fieldset->addField('note', 'textarea',
             array(
                 'label' => 'Note',
-                'class' => 'required-entry',
+                'required' => false,
                 'name' => 'note',
             ));
         $fieldset->addField('refund', 'text',
             array(
                 'label' => 'Refunded',
-                'class' => 'required-entry',
                 'required' => false,
                 'name' => 'refund',
             ));
