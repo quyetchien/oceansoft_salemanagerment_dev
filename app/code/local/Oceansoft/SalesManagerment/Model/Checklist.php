@@ -9,7 +9,8 @@ class Oceansoft_SalesManagerment_Model_Checklist extends Mage_Core_Model_Abstrac
     public function getGroupSale()
     {
         $collection = Mage::getModel('salesmanagerment/salesreport')->getCollection()
-            ->addFieldToFilter('checklist_id', $this->getId());
+            ->addFieldToFilter('checklist_id', $this->getId())
+            ->addFieldToFilter('user_id', array('neq' => $this->getUser()));
         if($collection){
             return $collection;
         }

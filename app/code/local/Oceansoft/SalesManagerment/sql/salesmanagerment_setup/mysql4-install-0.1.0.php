@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/salesreport')}` (
   `id` int(11) NOT NULL PRIMARY KEY auto_increment,
   `user_id` int(11) NOT NULL,
   `value` int(11) NOT NULL,
+  `price` decimal(12,4),
   `total_earn` decimal(12,4),
   `order_id` int(11) NOT NULL,
   `checklist_id` int(11) NOT NULL,

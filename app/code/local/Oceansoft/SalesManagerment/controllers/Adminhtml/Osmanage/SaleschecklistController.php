@@ -27,7 +27,16 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
     public function editAction()
     {
         $checkListId = $this->getRequest()->getParam('id');
+        $user_id = 0;
+        $session = Mage::getSingleton('admin/session');
+        if($user = $session->getUser()){
+            $user_id = $user->getUserId();
+        }
         $checkListModel = Mage::getModel('salesmanagerment/checklist')->load($checkListId);
+        if($user_id != $checkListModel->getUser()){
+            Mage::getSingleton('adminhtml/session')->addError('Only author can edit this note');
+            $this->_redirect('*/*/');
+        }
         if ($checkListModel->getId() || $checkListId == 0)
         {
             Mage::register('salesmanagerment_data', $checkListModel);
@@ -55,7 +64,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
         if ($this->getRequest()->getPost()) {
             try {
                 $postData = $this->getRequest()->getPost();
-                $postDataGroup = $postData['group'];
+                $postDataGroup = isset($postData['group']) ? $postData['group'] : false;
                 unset($postData['group']);
                 $checkListModel = Mage::getModel('salesmanagerment/checklist');
                 $checkListCollection = $checkListModel->getCollection();
@@ -98,6 +107,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                             $this->_importSalesReport(array(
                                 'user_id' => $user_id,
                                 'value' => $myPercentage,
+                                'price' => $myPrice,
                                 'total_earn' => $total_earn,
                                 'order_id' => $postData['order_id'],
                                 'checklist_id' => $checklist_id,
@@ -112,6 +122,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                                     $this->_importSalesReport(array(
                                         'user_id' => $post_group['saleid'],
                                         'value' => $post_group['salevalue'],
+                                        'price' => $group_price,
                                         'total_earn' => $group_total_earn,
                                         'order_id' => $postData['order_id'],
                                         'checklist_id' => $checklist_id,
@@ -151,7 +162,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
 
                         //delete report
                         $salesReportCollection = Mage::getModel('salesmanagerment/salesreport')->getCollection()
-                            ->addFieldToFilter('order_id', $postData['order_id']);
+                            ->addFieldToFilter('checklist_id', $checklist_id);
                         if($salesReportCollection){
                             foreach($salesReportCollection as $report_collection){
                                 $report_collection->delete();
@@ -162,6 +173,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                         $this->_importSalesReport(array(
                             'user_id' => $user_id,
                             'value' => $myPercentage,
+                            'price' => $myPrice,
                             'total_earn' => $total_earn,
                             'order_id' => $postData['order_id'],
                             'checklist_id' => $checklist_id,
@@ -176,6 +188,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                                 $this->_importSalesReport(array(
                                     'user_id' => $post_group['saleid'],
                                     'value' => $post_group['salevalue'],
+                                    'price' => $group_price,
                                     'total_earn' => $group_total_earn,
                                     'order_id' => $postData['order_id'],
                                     'checklist_id' => $checklist_id,

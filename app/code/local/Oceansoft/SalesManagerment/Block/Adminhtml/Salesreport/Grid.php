@@ -6,7 +6,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
     {
         parent::__construct();
         $this->setId('salesreportGrid');
-        $this->setDefaultSort('user');
+        $this->setDefaultSort('user_id');
         $this->setDefaultDir('DESC');
         $this->setUseAjax(true);
         $this->setSaveParametersInSession(true);
@@ -15,7 +15,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('salesmanagerment/checklist')->getCollection();
+        $collection = Mage::getModel('salesmanagerment/salesreport')->getCollection();
 
         // Add Form Filter Data
         $filter = Mage::app()->getRequest()->getParam('filter', null);
@@ -39,10 +39,10 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
         // Add SUM columns
         $collection->getSelect()->reset(Zend_Db_Select::COLUMNS)
             ->columns(array(
-                'user_id'   => 'user',
+                'user_id'   => 'user_id',
                 'price' => 'SUM(price)',
                 'total_salary' => 'SUM(total_earn)',
-            ))->group(array('main_table.user'));
+            ))->group(array('main_table.user_id'));
 
         $this->setCollection($collection);
         parent::_prepareCollection();

@@ -12,7 +12,27 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('salesmanagerment/checklist')->getCollection();
+        $user_id = 0;
+        $session = Mage::getSingleton('admin/session');
+        if($user = $session->getUser()){
+            $user_id = $user->getUserId();
+        }
+        $saleReportCollection = Mage::getModel('salesmanagerment/salesreport')
+            ->getCollection()
+            ->addFieldToFilter('user_id', $user_id);
+        $checklistId = array();
+        if($reportData = $saleReportCollection->getData()){
+            foreach($reportData as $report_data){
+                if($report_data['checklist_id']){
+                    $checklistId[] = $report_data['checklist_id'];
+                }
+            }
+        }
+        $checklistId = array_unique($checklistId);
+        $collection = Mage::getModel('salesmanagerment/checklist')
+            ->getCollection()
+            ->addFieldToFilter('id', array('in' => $checklistId));
+
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
