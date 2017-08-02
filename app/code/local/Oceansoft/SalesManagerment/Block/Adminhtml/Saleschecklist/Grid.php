@@ -17,22 +17,26 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
         if($user = $session->getUser()){
             $user_id = $user->getUserId();
         }
-        $saleReportCollection = Mage::getModel('salesmanagerment/salesreport')
-            ->getCollection()
-            ->addFieldToFilter('user_id', $user_id);
-        $checklistId = array();
-        if($reportData = $saleReportCollection->getData()){
-            foreach($reportData as $report_data){
-                if($report_data['checklist_id']){
-                    $checklistId[] = $report_data['checklist_id'];
+        if(Mage::helper('salesmanagerment')->checkIsAdminUser($user_id)){
+            $collection = Mage::getModel('salesmanagerment/checklist')
+                ->getCollection();
+        }else{
+            $saleReportCollection = Mage::getModel('salesmanagerment/salesreport')
+                ->getCollection()
+                ->addFieldToFilter('user_id', $user_id);
+            $checklistId = array();
+            if($reportData = $saleReportCollection->getData()){
+                foreach($reportData as $report_data){
+                    if($report_data['checklist_id']){
+                        $checklistId[] = $report_data['checklist_id'];
+                    }
                 }
             }
+            $checklistId = array_unique($checklistId);
+            $collection = Mage::getModel('salesmanagerment/checklist')
+                ->getCollection()
+                ->addFieldToFilter('id', array('in' => $checklistId));
         }
-        $checklistId = array_unique($checklistId);
-        $collection = Mage::getModel('salesmanagerment/checklist')
-            ->getCollection()
-            ->addFieldToFilter('id', array('in' => $checklistId));
-
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }

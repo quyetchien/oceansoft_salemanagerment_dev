@@ -53,6 +53,8 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
                 'label' => 'Refunded',
                 'required' => false,
                 'name' => 'refund',
+                'style' => 'width:50px',
+                'after_element_html' => '%'
             ));
 
         if ( Mage::registry('salesmanagerment_data') )

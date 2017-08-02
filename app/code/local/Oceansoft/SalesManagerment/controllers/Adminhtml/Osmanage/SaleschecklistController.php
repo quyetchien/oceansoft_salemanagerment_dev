@@ -27,16 +27,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
     public function editAction()
     {
         $checkListId = $this->getRequest()->getParam('id');
-        $user_id = 0;
-        $session = Mage::getSingleton('admin/session');
-        if($user = $session->getUser()){
-            $user_id = $user->getUserId();
-        }
         $checkListModel = Mage::getModel('salesmanagerment/checklist')->load($checkListId);
-        if($user_id != $checkListModel->getUser()){
-            Mage::getSingleton('adminhtml/session')->addError('Only author can edit this note');
-            $this->_redirect('*/*/');
-        }
         if ($checkListModel->getId() || $checkListId == 0)
         {
             Mage::register('salesmanagerment_data', $checkListModel);
@@ -92,6 +83,12 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
                         }
                         $myPercentage = $this->_getMyPercentage($postData, $postDataGroup);
+                        if($myPercentage < 0){
+                            Mage::getSingleton('adminhtml/session')->addError('Total percentage can not larger 100%');
+                            Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
+                            $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                            return;
+                        }
                         $myPrice = $orderGrandTotal * $myPercentage / 100;
                         $total_earn = $this->_calculationEarnPrice($myPrice, $postData['created_at'], $user_id);
                         $checkListModel
@@ -149,6 +146,12 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
                         }
                         $myPercentage = $this->_getMyPercentage($postData, $postDataGroup);
+                        if($myPercentage < 0){
+                            Mage::getSingleton('adminhtml/session')->addError('Total percentage can not larger 100%');
+                            Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
+                            $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                            return;
+                        }
                         $myPrice = $orderGrandTotal * $myPercentage / 100;
                         $total_earn = $this->_calculationEarnPrice($myPrice, $postData['created_at'], $user_id);
 
@@ -169,9 +172,10 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                             }
                         }
 
-                        // import report for me
+                        $author = $checkListModel->load($checklist_id)->getUser();
+                        // import report for author
                         $this->_importSalesReport(array(
-                            'user_id' => $user_id,
+                            'user_id' => $author,
                             'value' => $myPercentage,
                             'price' => $myPrice,
                             'total_earn' => $total_earn,

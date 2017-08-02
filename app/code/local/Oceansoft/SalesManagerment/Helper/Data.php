@@ -3,6 +3,7 @@
 class Oceansoft_SalesManagerment_Helper_Data extends Mage_Core_Helper_Abstract
 {
     const USER_ROLE = 'Sale';
+    const ADMIN_ROLE = 'Administrators';
 
     public function getSaleUser(){
         $model = Mage::getModel('admin/role');
@@ -27,6 +28,15 @@ class Oceansoft_SalesManagerment_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         return $output;
+    }
+
+    public function checkIsAdminUser($user_id){
+        $role_data = Mage::getModel('admin/user')->load($user_id)->getRole();
+        $role_name = $role_data->getRoleName();
+        if($role_name == self::ADMIN_ROLE){
+            return true;
+        }
+        return false;
     }
 
     public function getUserNameById($user_id){

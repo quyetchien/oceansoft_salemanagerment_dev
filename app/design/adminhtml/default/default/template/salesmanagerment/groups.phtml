@@ -10,7 +10,7 @@ $_counter = 0;
 ?>
 <tr>
     <td class="label"><?php echo $this->getElement()->getLabel() ?></td>
-    <td colspan="10" class="grid hours">
+    <td colspan="10" class="grid group">
         <table id="attribute-options-table" class="dynamic-grid salesmanagerment-group" cellspacing="0" cellpadding="0">
             <tbody>
             <tr>
@@ -26,7 +26,7 @@ $_counter = 0;
                             <?php endforeach; ?>
                         </select>
                     </td>
-                    <td><input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][salevalue]" value="<?php echo $_item->getValue() ?>" class="input-text" type="text"></td>
+                    <td><input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][salevalue]" value="<?php echo $_item->getValue() ?>" class="input-text" type="text" style="width: 50%"> %</td>
                     <td class="a-left" id="delete_button_container_option_<?php echo $_counter ?>'">
                         <input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][id]" value="<?php echo $_item->getId() ?>" type="hidden">
                         <input id="delete-row-<?php echo $_counter ?>" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_<?php echo $_counter ?>]" value=""/>
@@ -39,9 +39,10 @@ $_counter = 0;
             ?>
             </tbody>
         </table>
+        <p class="note" id="note_group"><span>Your partner's percentage in this order</span></p>
 
         <script type="text/javascript">//<![CDATA[
-            var _form_html_row = '<tr class="option-row salesmanagerment-group-value" id="group-row-{{id}}"><td><select name="<?php echo $_htmlName; ?>[value][option_{{id}}][saleid]"><?php foreach ($allUser as $user_id => $user_name) : ?><option value="<?php echo $user_id ?>"><?php echo $user_name ?></option><?php endforeach; ?></select></td><td><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][salevalue]" value="" class="input-text" type="text"></td><td class="a-left" id="delete_button_container_option_{{id}}"><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][id]" value="" type="hidden"><input id="delete-row-{{id}}" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_{{id}}]" value=""/><button onclick="$(\'group-row-{{id}}\').style.display=\'none\'; $(\'delete-row-{{id}}\').setValue(1);" title="Delete" type="button" class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button></td></tr>';
+            var _form_html_row = '<tr class="option-row salesmanagerment-group-value" id="group-row-{{id}}"><td><select name="<?php echo $_htmlName; ?>[value][option_{{id}}][saleid]"><?php foreach ($allUser as $user_id => $user_name) : ?><option value="<?php echo $user_id ?>"><?php echo $user_name ?></option><?php endforeach; ?></select></td><td><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][salevalue]" value="" class="input-text" type="text" style="width:50%"> %</td><td class="a-left" id="delete_button_container_option_{{id}}"><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][id]" value="" type="hidden"><input id="delete-row-{{id}}" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_{{id}}]" value=""/><button onclick="$(\'group-row-{{id}}\').style.display=\'none\'; $(\'delete-row-{{id}}\').setValue(1);" title="Delete" type="button" class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button></td></tr>';
             var _salesmanagerment_counter = <?php echo $_counter?>;
             $('add_new_option_button').observe('click', function(){
                 $('attribute-options-table').insert(_form_html_row.replace(/\{\{id\}\}/ig, _salesmanagerment_counter));
