@@ -9,12 +9,12 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
-        $fieldset->addField('order_date', 'datetime',
+        $fieldset->addField('order_date', 'date',
             array(
                 'label'     => 'Order Date',
                 'required'  => true,
                 'name'      => 'order_date',
-                'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
+                'format' => 'yyyy-MM-dd',
                 'image'     => $this->getSkinUrl('images/grid-cal.gif')
             ));
         $fieldset->addField('shift', 'select',

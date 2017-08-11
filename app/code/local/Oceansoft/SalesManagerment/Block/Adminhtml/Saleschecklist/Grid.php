@@ -90,6 +90,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
                 'header'=> $this->__('Order Date'),
                 'index' => 'order_date',
                 'type' => 'date',
+                'format' => 'yyyy-MM-dd',
             )
         );
 

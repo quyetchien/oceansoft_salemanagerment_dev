@@ -23,23 +23,13 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
             $data = Mage::helper('adminhtml')->prepareFilterString($filter);
         }
 
-        if (isset($data['report_from'])) {
-            $date_from = str_replace('/', '-', $data['report_from']);
-            $data['report_from'] =  date('Y-m-d', strtotime($date_from));
+        if (isset($data['month']) && isset($data['year'])) {
             $collection->addFieldToFilter('main_table.order_date', array(
-                'from'  => $data['report_from'],
+                'from'  => $data['year'] . '-' . $data['month'] . '-01',
+                'to'  => $data['year'] . '-' . $data['month'] . '-31',
                 'date'  => true
             ));
         }
-        if (isset($data['report_to'])) {
-            $date_to = str_replace('/', '-', $data['report_to']);
-            $data['report_to'] =  date('Y-m-d', strtotime($date_to));
-            $collection->addFieldToFilter('main_table.order_date', array(
-                'to'    => $data['report_to'],
-                'date'  => true
-            ));
-        }
-
         // Add SUM columns
         $collection->getSelect()->reset(Zend_Db_Select::COLUMNS)
             ->columns(array(
