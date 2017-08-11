@@ -21,21 +21,9 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             $collection = Mage::getModel('salesmanagerment/checklist')
                 ->getCollection();
         }else{
-            $saleReportCollection = Mage::getModel('salesmanagerment/salesreport')
-                ->getCollection()
-                ->addFieldToFilter('user_id', $user_id);
-            $checklistId = array();
-            if($reportData = $saleReportCollection->getData()){
-                foreach($reportData as $report_data){
-                    if($report_data['checklist_id']){
-                        $checklistId[] = $report_data['checklist_id'];
-                    }
-                }
-            }
-            $checklistId = array_unique($checklistId);
             $collection = Mage::getModel('salesmanagerment/checklist')
                 ->getCollection()
-                ->addFieldToFilter('id', array('in' => $checklistId));
+                ->addFieldToFilter('user', $user_id);
         }
         $this->setCollection($collection);
         return parent::_prepareCollection();
@@ -90,18 +78,18 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             )
         );
 
-        $this->addColumn('group',
+        $this->addColumn('sale_percentage',
             array(
-                'header'=> $this->__('Group'),
-                'renderer'  => 'salesmanagerment/adminhtml_saleschecklist_render_group',
+                'header'=> $this->__('Sale Percentage'),
+                'index' => 'sale_percentage'
             )
         );
 
-        $this->addColumn('created_at',
+        $this->addColumn('order_date',
             array(
-                'header'=> $this->__('Created At'),
-                'index' => 'created_at',
-                'type' => 'datetime',
+                'header'=> $this->__('Order Date'),
+                'index' => 'order_date',
+                'type' => 'date',
             )
         );
 

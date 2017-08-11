@@ -9,14 +9,21 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
-        $fieldset->addField('created_at', 'datetime',
+        $fieldset->addField('order_date', 'datetime',
             array(
-                'label'     => 'Created At',
+                'label'     => 'Order Date',
                 'required'  => true,
-                'name'      => 'created_at',
-                'time'      => true,
-                'format'    => $this->escDates(),
+                'name'      => 'order_date',
+                'format' => Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT),
                 'image'     => $this->getSkinUrl('images/grid-cal.gif')
+            ));
+        $fieldset->addField('shift', 'select',
+            array(
+                'label' => 'Shift',
+                'class' => 'required-entry',
+                'required' => true,
+                'name' => 'shift',
+                'values' => $this->_getListShiftForUser(),
             ));
         $fieldset->addField('order_id', 'text',
             array(
@@ -28,33 +35,35 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset->addField('ticket_id', 'text',
             array(
                 'label' => 'Ticket Id',
-                'required' => false,
+                'required' => true,
                 'name' => 'ticket_id',
             ));
-        // custom field group
-        $fieldset->addField('group', 'text', array(
-            'name'      => 'group',
-            'label'     => 'Group',
-            'required'  => false,
-        ));
-        $group_sale = $form->getElement('group');
-        $group_sale->setRenderer(
-            $this->getLayout()->createBlock('salesmanagerment/adminhtml_saleschecklist_edit_renderer_group')
-        );
-        //
+        $fieldset->addField('sale_percentage', 'select',
+            array(
+                'label' => 'Sale Percentage',
+                'class' => 'required-entry',
+                'required' => true,
+                'name' => 'sale_percentage',
+                'values' => $this->_listPercentage(),
+            ));
         $fieldset->addField('note', 'textarea',
             array(
                 'label' => 'Note',
                 'required' => false,
                 'name' => 'note',
             ));
-        $fieldset->addField('refund', 'text',
+        $fieldset->addField('refund', 'select',
             array(
                 'label' => 'Refunded',
                 'required' => false,
                 'name' => 'refund',
-                'style' => 'width:50px',
-                'after_element_html' => '%'
+                'values' => $this->_listPercentage(true),
+            ));
+        $fieldset->addField('refund_reason', 'textarea',
+            array(
+                'label' => 'Refund Reason',
+                'required' => false,
+                'name' => 'refund_reason',
             ));
 
         if ( Mage::registry('salesmanagerment_data') )
@@ -65,8 +74,44 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         return parent::_prepareForm();
     }
 
-    private function escDates() {
-        return 'yyyy-MM-dd HH:mm:ss';
+    protected function _listPercentage($emptyValue = false){
+        $result = array();
+        if($emptyValue){
+            $result[0] = '';
+        }
+        $i = 10;
+        while ($i <= 100){
+            $result[$i] = $i . '%';
+            $i = $i + 10;
+        }
+        return $result;
     }
 
+    protected function _getListShiftForUser(){
+        $checklist_id = $this->getRequest()->getParam('id');
+        $collection = Mage::getModel('salesmanagerment/checklist')->load($checklist_id);
+        if($collectionData = $collection->getData()){
+            $user_id = $collectionData['user'];
+        }else{
+            $session = Mage::getSingleton('admin/session');
+            $user_id = 0;
+            if($user = $session->getUser()){
+                $user_id = $user->getUserId();
+            }
+        }
+        $result = array();
+        $revenue = Mage::getModel('salesmanagerment/revenue')->getCollection()
+            ->addFieldToFilter('user_id', $user_id);
+        if($revenueData = $revenue->getData()){
+            if($revenueData[0]['rule']){
+                $userRule = unserialize($revenueData[0]['rule']);
+                if($userRule){
+                    foreach($userRule as $rule){
+                        $result[$rule['shift']] = 'Ca ' . $rule['shift'];
+                    }
+                }
+            }
+        }
+        return $result;
+    }
 }

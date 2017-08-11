@@ -15,22 +15,26 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('salesmanagerment/salesreport')->getCollection();
-
+        $collection = Mage::getModel('salesmanagerment/checklist')->getCollection();
         // Add Form Filter Data
         $filter = Mage::app()->getRequest()->getParam('filter', null);
         $data   = array();
         if (is_string($filter)) {
             $data = Mage::helper('adminhtml')->prepareFilterString($filter);
         }
+
         if (isset($data['report_from'])) {
-            $collection->addFieldToFilter('main_table.created_at', array(
+            $date_from = str_replace('/', '-', $data['report_from']);
+            $data['report_from'] =  date('Y-m-d', strtotime($date_from));
+            $collection->addFieldToFilter('main_table.order_date', array(
                 'from'  => $data['report_from'],
                 'date'  => true
             ));
         }
         if (isset($data['report_to'])) {
-            $collection->addFieldToFilter('main_table.created_at', array(
+            $date_to = str_replace('/', '-', $data['report_to']);
+            $data['report_to'] =  date('Y-m-d', strtotime($date_to));
+            $collection->addFieldToFilter('main_table.order_date', array(
                 'to'    => $data['report_to'],
                 'date'  => true
             ));
@@ -39,10 +43,10 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
         // Add SUM columns
         $collection->getSelect()->reset(Zend_Db_Select::COLUMNS)
             ->columns(array(
-                'user_id'   => 'user_id',
+                'user_id'   => 'user',
                 'price' => 'SUM(price)',
                 'total_salary' => 'SUM(total_earn)',
-            ))->group(array('main_table.user_id'));
+            ))->group(array('main_table.user'));
 
         $this->setCollection($collection);
         parent::_prepareCollection();
@@ -58,7 +62,6 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
             'width'     => '10px',
             'index'     => 'user_id',
             'type'      => 'text',
-            'totals_label'  => Mage::helper('salesmanagerment')->__('Total'),
         ));
 
         $this->addColumn('username', array(

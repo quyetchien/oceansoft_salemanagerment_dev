@@ -65,11 +65,10 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_RevenueController extends Ma
                 $postData = $this->getRequest()->getPost();
                 $revenueModel = Mage::getModel('salesmanagerment/revenue');
                 $rule = array();
-                if($postData['rule'] && $postData['rule']['value']){
+                if($postData['rule'] && isset($postData['rule']['value']) && $postData['rule']['value']){
                     foreach($postData['rule']['value'] as $rule_value){
                         $rule[] = array(
-                            'from' => $rule_value['rulefrom'],
-                            'to' => $rule_value['ruleto'],
+                            'shift' => $rule_value['shift_id'],
                             'value' => $rule_value['rulevalue']
                         );
                     }

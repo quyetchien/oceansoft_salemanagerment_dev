@@ -55,8 +55,6 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
         if ($this->getRequest()->getPost()) {
             try {
                 $postData = $this->getRequest()->getPost();
-                $postDataGroup = isset($postData['group']) ? $postData['group'] : false;
-                unset($postData['group']);
                 $checkListModel = Mage::getModel('salesmanagerment/checklist');
                 $checkListCollection = $checkListModel->getCollection();
                 $checklist_id = $this->getRequest()->getParam('id');
@@ -66,15 +64,29 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                     $user_id = $user->getUserId();
                 }
                 if ($checklist_id <= 0) {
-                    // check order id existed
-                    $checkOrderCreated = $checkListCollection
+                    // check percentage
+                    $maxPercentage = 100;
+                    $checkNote = $checkListCollection
                         ->addFieldToFilter('order_id', $postData['order_id']);
-                    if($checkOrderCreated->getData()){
-                        Mage::getSingleton('adminhtml/session')->addError('Ticket with Order Id existed');
-                        Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                        $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                    if($noteData = $checkNote->getData()){
+                        foreach($noteData as $note){
+                            if($note['user'] == $user_id){
+                                $this->_errorResult('You have one note with same order id');
+                                return;
+                            }
+                            if($note['refund'] > 0){
+                                $maxPercentage =- $note['refund'];
+                            }
+                            if($note['sale_percentage'] > 0){
+                                $maxPercentage =- $note['sale_percentage'];
+                            }
+                        }
+                    }
+                    if($postData['sale_percentage'] > $maxPercentage){
+                        $this->_errorResult('You can only fill form with: ' . $maxPercentage . '%');
                         return;
                     }
+                    // end check percentage
 
                     $order = Mage::getModel('sales/order')->loadByIncrementId($postData['order_id']);
                     if($order->getData()){
@@ -82,140 +94,76 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                         if($postData['refund'] > 0){
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
                         }
-                        $myPercentage = $this->_getMyPercentage($postData, $postDataGroup);
-                        if($myPercentage < 0){
-                            Mage::getSingleton('adminhtml/session')->addError('Total percentage can not larger 100%');
-                            Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                            $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
-                            return;
-                        }
-                        $myPrice = $orderGrandTotal * $myPercentage / 100;
-                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['created_at'], $user_id);
+                        $myPrice = $orderGrandTotal * $postData['sale_percentage'] / 100;
+                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['order_date'], $postData['shift'], $user_id);
                         $checkListModel
                             ->addData($postData)
                             ->setCustomerEmail($order->getCustomerEmail())
                             ->setPrice($myPrice)
-                            ->setOrderDate($order->getCreatedAt())
                             ->setUser($user_id)
+                            ->setTotalEarn($total_earn)
                             ->save();
-                        $checklist_id = $checkListModel->getId();
-                        if($checklist_id){
-                            // import report for me
-                            $this->_importSalesReport(array(
-                                'user_id' => $user_id,
-                                'value' => $myPercentage,
-                                'price' => $myPrice,
-                                'total_earn' => $total_earn,
-                                'order_id' => $postData['order_id'],
-                                'checklist_id' => $checklist_id,
-                                'created_at' => $postData['created_at']
-                            ));
 
-                            // import report for group
-                            if($postDataGroup && $postDataGroup['value']){
-                                foreach($postDataGroup['value'] as $post_group){
-                                    $group_price = $orderGrandTotal * $post_group['salevalue'] / 100;
-                                    $group_total_earn = $this->_calculationEarnPrice($group_price, $postData['created_at'], $post_group['saleid']);
-                                    $this->_importSalesReport(array(
-                                        'user_id' => $post_group['saleid'],
-                                        'value' => $post_group['salevalue'],
-                                        'price' => $group_price,
-                                        'total_earn' => $group_total_earn,
-                                        'order_id' => $postData['order_id'],
-                                        'checklist_id' => $checklist_id,
-                                        'created_at' => $postData['created_at']
-                                    ));
-                                }
-                            }
-                        }
                         Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
                         Mage::getSingleton('adminhtml/session')->setFormData(false);
                         $this->_redirect('*/*/');
                         return;
                     }else{
-                        Mage::getSingleton('adminhtml/session')->addError('Order not existed');
-                        Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                        $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                        $this->_errorResult('Order not existed');
                         return;
                     }
                 }else{
                     $order = Mage::getModel('sales/order')->loadByIncrementId($postData['order_id']);
                     if($order->getData()){
+                        // check percentage
+                        $maxPercentage = 100;
+                        $checkNote = $checkListCollection
+                            ->addFieldToFilter('order_id', $postData['order_id'])
+                            ->addFieldToFilter('id', array('neq' => $checklist_id));
+
+                        if($noteData = $checkNote->getData()){
+                            foreach($noteData as $note){
+                                if($note['refund'] > 0){
+                                    $maxPercentage =- $note['refund'];
+                                }
+                                if($note['sale_percentage'] > 0){
+                                    $maxPercentage =- $note['sale_percentage'];
+                                }
+                            }
+                        }
+                        if($postData['sale_percentage'] > $maxPercentage){
+                            $this->_errorResult('You can only fill form with: ' . $maxPercentage . '%');
+                            return;
+                        }
+                        // end check percentage
+
                         $orderGrandTotal = $order->getGrandTotal();
                         if($postData['refund'] > 0){
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
                         }
-                        $myPercentage = $this->_getMyPercentage($postData, $postDataGroup);
-                        if($myPercentage < 0){
-                            Mage::getSingleton('adminhtml/session')->addError('Total percentage can not larger 100%');
-                            Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                            $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
-                            return;
-                        }
-                        $myPrice = $orderGrandTotal * $myPercentage / 100;
-                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['created_at'], $user_id);
+                        $myPrice = $orderGrandTotal * $postData['sale_percentage'] / 100;
+                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['order_date'], $postData['shift'], $user_id);
 
                         // update oceansoft_sales_checklist
                         $checkListModel->load($checklist_id)->addData($postData)
                             ->setCustomerEmail($order->getCustomerEmail())
                             ->setPrice($myPrice)
-                            ->setOrderDate($order->getCreatedAt())
+                            ->setTotalEarn($total_earn)
                             ->setId($checklist_id)
                             ->save();
-
-                        //delete report
-                        $salesReportCollection = Mage::getModel('salesmanagerment/salesreport')->getCollection()
-                            ->addFieldToFilter('checklist_id', $checklist_id);
-                        if($salesReportCollection){
-                            foreach($salesReportCollection as $report_collection){
-                                $report_collection->delete();
-                            }
-                        }
-
-                        $author = $checkListModel->load($checklist_id)->getUser();
-                        // import report for author
-                        $this->_importSalesReport(array(
-                            'user_id' => $author,
-                            'value' => $myPercentage,
-                            'price' => $myPrice,
-                            'total_earn' => $total_earn,
-                            'order_id' => $postData['order_id'],
-                            'checklist_id' => $checklist_id,
-                            'created_at' => $postData['created_at']
-                        ));
-
-                        // import report for group
-                        if($postDataGroup && $postDataGroup['value']){
-                            foreach($postDataGroup['value'] as $post_group){
-                                $group_price = $orderGrandTotal * $post_group['salevalue'] / 100;
-                                $group_total_earn = $this->_calculationEarnPrice($group_price, $postData['created_at'], $post_group['saleid']);
-                                $this->_importSalesReport(array(
-                                    'user_id' => $post_group['saleid'],
-                                    'value' => $post_group['salevalue'],
-                                    'price' => $group_price,
-                                    'total_earn' => $group_total_earn,
-                                    'order_id' => $postData['order_id'],
-                                    'checklist_id' => $checklist_id,
-                                    'created_at' => $postData['created_at']
-                                ));
-                            }
-                        }
 
                         Mage::getSingleton('adminhtml/session')->addSuccess('successfully saved');
                         Mage::getSingleton('adminhtml/session')->setFormData(false);
                         $this->_redirect('*/*/');
                         return;
+
                     }else{
-                        Mage::getSingleton('adminhtml/session')->addError('Order not existed');
-                        Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                        $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                        $this->_errorResult('Order not existed');
                         return;
                     }
                 }
             } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
-                $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+                $this->_errorResult($e->getMessage());
                 return;
             }
 
@@ -248,53 +196,33 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
         $this->_redirect('*/*/');
     }
 
-    protected function _calculationEarnPrice($price, $time, $user_id){
+    /**
+     *  My Custom Function
+     */
+
+    protected function _errorResult($msg){
+        Mage::getSingleton('adminhtml/session')->addError($msg);
+        Mage::getSingleton('adminhtml/session')->setFormData($this->getRequest()->getPost());
+        $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+        return;
+    }
+
+    protected function _calculationEarnPrice($price, $order_date, $shift, $user_id){
         $user_revenue = Mage::getModel('salesmanagerment/revenue')
             ->getCollection()
             ->addFieldToFilter('user_id', $user_id);
         if($user = $user_revenue->getData()){
             $user = $user[0];
-            if($time >= $user['from'] && $time <= $user['to']){
+            if($order_date >= $user['from'] && $order_date <= $user['to']){
                 $userRule = unserialize($user['rule']);
                 foreach($userRule as $rule){
-                    if($this->_checkTimeInCondition($rule['from'], $rule['to'], $time)){
+                    if($shift == $rule['shift']){
                         return $price * $rule['value'] / 100;
                     }
                 }
             }
         }
         return 0;
-    }
-
-    protected function _checkTimeInCondition($from, $to, $current){
-        $from = strtotime($from);
-        $to = strtotime($to);
-        $current = strtotime(date("H:i:s",strtotime($current)));
-        if($to < $from){
-            $to = $to + 86400;
-            if($current < $from){
-                $current = $current + 86400;
-            }
-        }
-        if($from <= $current && $current <= $to){
-            return true;
-        }
-        return false;
-    }
-
-    protected function _importSalesReport($dataImport){
-        if(!$dataImport){
-            return false;
-        }
-        $salesReportModel = Mage::getModel('salesmanagerment/salesreport');
-        try{
-            $salesReportModel
-                ->addData($dataImport)
-                ->save();
-        }catch (Exception $e){
-            return false;
-        }
-        return true;
     }
 
     protected function _getMyPercentage($postData, $postDataGroup){

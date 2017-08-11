@@ -23,9 +23,6 @@
                     <revenue>
                         <table>oceansoft_sales_revenue</table>
                     </revenue>
-                    <salesreport>
-                        <table>oceansoft_sales_report</table>
-                    </salesreport>
                 </entities>
             </salesmanagerment_mysql4>
         </models>

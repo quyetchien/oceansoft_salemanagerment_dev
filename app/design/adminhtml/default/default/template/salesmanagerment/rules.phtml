@@ -9,7 +9,7 @@ $rules = $collection->getRule();
 if($rules){
     $rules = unserialize($rules);
 }
-$_counter = 0;
+$_counter = 1;
 ?>
 
 <tr>
@@ -18,25 +18,18 @@ $_counter = 0;
         <table id="attribute-options-table" class="dynamic-grid salesmanagerment-rule" cellspacing="0" cellpadding="0">
             <tbody>
             <tr>
-                <th><?php echo $this->__('From') ?></th><th><?php echo $this->__('To') ?></th><th><?php echo $this->__('Value') ?></th>
+                <th><?php echo $this->__('Shift') ?></th><th><?php echo $this->__('Value') ?></th>
                 <th><button id="add_new_option_button" title="Add Option" type="button" class="scalable add"><span><span><span><?php echo $this->__('Add Option') ?></span></span></span></button></th>
             </tr>
             <?php if(is_array($rules)) : ?>
             <?php foreach ($rules as $_rule): ?>
                 <tr class="option-row salesmanagerment-rule-value" id="group-row-<?php echo $_counter?>">
                     <td>
-                        <select name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][rulefrom]">
-                            <?php echo Mage::helper('salesmanagerment')->createPickerTime($_rule['from']) ; ?>
-                        </select>
-                    </td>
-                    <td>
-                        <select name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][ruleto]">
-                            <?php echo Mage::helper('salesmanagerment')->createPickerTime($_rule['to']) ; ?>
-                        </select>
+                        <?php echo 'Ca ' . $_rule['shift']; ?>
                     </td>
                     <td><input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][rulevalue]" value="<?php echo $_rule['value'] ?>" class="input-text" type="text"></td>
                     <td class="a-left" id="delete_button_container_option_<?php echo $_counter ?>'">
-                        <input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][id]" value="" type="hidden">
+                        <input name="<?php echo $_htmlName; ?>[value][option_<?php echo $_counter ?>][shift_id]" value="<?php echo $_rule['shift'] ?>" type="hidden">
                         <input id="delete-row-<?php echo $_counter ?>" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_<?php echo $_counter ?>]" value=""/>
                         <button onclick="$('group-row-<?php echo $_counter ?>').style.display='none'; $('delete-row-<?php echo $_counter ?>').setValue(1);" title="Delete" type="button" class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button>
                     </td>
@@ -50,7 +43,7 @@ $_counter = 0;
         </table>
 
         <script type="text/javascript">//<![CDATA[
-            var _form_html_row = '<tr class="option-row salesmanagerment-group-value" id="group-row-{{id}}"><td><select name="<?php echo $_htmlName; ?>[value][option_{{id}}][rulefrom]"><?php echo Mage::helper('salesmanagerment')->createPickerTime() ; ?></select></td><td><select name="<?php echo $_htmlName; ?>[value][option_{{id}}][ruleto]"><?php echo Mage::helper('salesmanagerment')->createPickerTime() ; ?></select></td><td><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][rulevalue]" value="" class="input-text" type="text"></td><td class="a-left" id="delete_button_container_option_{{id}}"><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][id]" value="" type="hidden"><input id="delete-row-{{id}}" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_{{id}}]" value=""/><button onclick="$(\'group-row-{{id}}\').style.display=\'none\'; $(\'delete-row-{{id}}\').setValue(1);" title="Delete" type="button" class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button></td></tr>';
+            var _form_html_row = '<tr class="option-row salesmanagerment-group-value" id="group-row-{{id}}"><td><span><?php echo 'Ca {{id}}'?><span></td><td><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][rulevalue]" value="" class="input-text" type="text"></td><td class="a-left" id="delete_button_container_option_{{id}}"><input name="<?php echo $_htmlName; ?>[value][option_{{id}}][shift_id]" value="{{id}}" type="hidden"><input id="delete-row-{{id}}" type="hidden" class="delete-flag" name="<?php echo $_htmlName; ?>[delete][option_{{id}}]" value=""/><button onclick="$(\'group-row-{{id}}\').style.display=\'none\'; $(\'delete-row-{{id}}\').setValue(1);" title="Delete" type="button" class="scalable delete delete-option"><span><span><span>Delete</span></span></span></button></td></tr>';
             var _salesmanagerment_counter = <?php echo $_counter?>;
             $('add_new_option_button').observe('click', function(){
                 $('attribute-options-table').insert(_form_html_row.replace(/\{\{id\}\}/ig, _salesmanagerment_counter));

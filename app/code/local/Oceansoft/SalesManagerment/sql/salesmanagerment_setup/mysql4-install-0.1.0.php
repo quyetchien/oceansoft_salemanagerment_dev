@@ -12,34 +12,25 @@ CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/checklist')}` (
   `order_id` int(11) NOT NULL,
   `customer_email` varchar(255) NOT NULL,
   `ticket_id` varchar(255) NOT NULL,
-  `price` decimal(12,4),
-  `refund` int(11),
+  `price` decimal(12,2),
+  `sale_percentage` int(11) NOT NULL,
   `note` text,
-  `order_date` datetime NULL,
-  `created_at` datetime NULL,
-  `user` varchar(255) NOT NULL
+  `refund` int(11),
+  `refund_reason` text,
+  `shift` int(11) NOT NULL,
+  `order_date` date NULL,
+  `user` varchar(255) NOT NULL,
+  `total_earn` decimal(12,2)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS {$this->getTable('salesmanagerment/revenue')};
 CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/revenue')}` (
   `id` int(11) NOT NULL PRIMARY KEY auto_increment,
   `user_id` int(11) NOT NULL,
-  `revenue` int(11),
+  `revenue` decimal(12,2),
   `from` datetime NULL,
   `to` datetime NULL,
   `rule` text NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS {$this->getTable('salesmanagerment/salesreport')};
-CREATE TABLE IF NOT EXISTS `{$this->getTable('salesmanagerment/salesreport')}` (
-  `id` int(11) NOT NULL PRIMARY KEY auto_increment,
-  `user_id` int(11) NOT NULL,
-  `value` int(11) NOT NULL,
-  `price` decimal(12,4),
-  `total_earn` decimal(12,4),
-  `order_id` int(11) NOT NULL,
-  `checklist_id` int(11) NOT NULL,
-  `created_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ");
