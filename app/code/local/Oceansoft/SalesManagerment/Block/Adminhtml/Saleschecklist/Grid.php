@@ -94,6 +94,13 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             )
         );
 
+        $this->addColumn('shift',
+            array(
+                'header'=> $this->__('Shift'),
+                'index' => 'shift'
+            )
+        );
+
         $this->addColumn('user',
             array(
                 'header'=> $this->__('User'),
