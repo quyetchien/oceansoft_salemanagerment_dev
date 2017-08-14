@@ -12,6 +12,8 @@ ini_set('display_errors', 1);
 Mage::app();
 
 
+$string = 'Aug 1, 2017 5:10:45 PM';
+echo date("H:i:s",strtotime($string));
 // MY CODE
 
 try{
@@ -26,59 +28,24 @@ try{
         foreach($results as $note){
             $checkListModel = Mage::getModel('salesmanagerment/checklist');
 
-//            $myPrice = '143.500';
-//            $created_at = 'Jul 22, 2017 5:19:26 AM';
-//            $user_id = convertUserId('lily');
-//            $order_id = '100017313';
-//            $customer_email = 'lorcan@boom22.com';
-//            $ticket_id = '17841';
-//            $my_percent = 50;
-//            $orderGrandTotal = $myPrice * 100/$my_percent;
-//
-//            $postDataGroup = array(
-//                array(
-//                    'saleid' => convertUserId('brian'),
-//                    'salevalue' => 50,
-//                ),
-//            );
-
-            $total_earn = _calculationEarnPrice($myPrice, $created_at, $user_id);
+            $shift = _checkTimeInCondition($note['created_at']);
+            $data = array(
+                'order_id' => $note['order_id'],
+                'customer_email' => $note['customer_email'],
+                'ticket_id' => $note['ticket_id'],
+                'price' => $note['price'],
+                'sale_percentage' => $note['sale_percentage'],
+                'note' => $note['note'],
+                'refund' => 0,
+                'shift' => $shift,
+                'order_date' => $note['created_at'],
+                'user' => convertUserId($note['user']),
+                'total_earn' => _calculationEarnPrice($note['price'], $note['created_at'], $shift, convertUserId($note['user']))
+            );
             $checkListModel
-                ->setOrderId($order_id)
-                ->setCustomerEmail($customer_email)
-                ->setTicketId($ticket_id)
-                ->setPrice($myPrice)
-                ->setCreatedAt($created_at)
-                ->setUser($user_id)
+                ->addData($data)
                 ->save();
-            $checklist_id = $checkListModel->getId();
-            if($checklist_id){
-                // import report for me
-                _importSalesReport(array(
-                    'user_id' => $user_id,
-                    'value' => $my_percent,
-                    'price' => $myPrice,
-                    'total_earn' => $total_earn,
-                    'order_id' => $order_id,
-                    'checklist_id' => $checklist_id,
-                    'created_at' => $created_at
-                ));
 
-                // import report for group
-                foreach($postDataGroup as $post_group){
-                    $group_price = $orderGrandTotal * $post_group['salevalue'] / 100;
-                    $group_total_earn = _calculationEarnPrice($group_price, $created_at, $post_group['saleid']);
-                    _importSalesReport(array(
-                        'user_id' => $post_group['saleid'],
-                        'value' => $post_group['salevalue'],
-                        'price' => $group_price,
-                        'total_earn' => $group_total_earn,
-                        'order_id' => $order_id,
-                        'checklist_id' => $checklist_id,
-                        'created_at' => $created_at
-                    ));
-                }
-            }
         }
     }
 
@@ -86,19 +53,20 @@ try{
     echo $e->getMessage();
 }
 
-function _importSalesReport($dataImport){
-    if(!$dataImport){
-        return false;
+function _calculationEarnPrice($price, $order_date, $shift, $user_id){
+    $user_revenue = Mage::getModel('salesmanagerment/revenue')
+        ->getCollection()
+        ->addFieldToFilter('user_id', $user_id);
+    if($user = $user_revenue->getData()){
+        $user = $user[0];
+        $userRule = unserialize($user['rule']);
+        foreach($userRule as $rule){
+            if($shift == $rule['shift']){
+                return $price * $rule['value'] / 100;
+            }
+        }
     }
-    $salesReportModel = Mage::getModel('salesmanagerment/salesreport');
-    try{
-        $salesReportModel
-            ->addData($dataImport)
-            ->save();
-    }catch (Exception $e){
-        return false;
-    }
-    return true;
+    return 0;
 }
 
 function convertUserId($user_name){
@@ -112,39 +80,15 @@ function convertUserId($user_name){
     }
 }
 
-function _calculationEarnPrice($price, $time, $user_id){
-    $time =  date("Y-m-d H:i:s",strtotime($time));
-    $user_revenue = Mage::getModel('salesmanagerment/revenue')
-        ->getCollection()
-        ->addFieldToFilter('user_id', $user_id);
-    if($user = $user_revenue->getData()){
-        $user = $user[0];
-        if($time >= $user['from'] && $time <= $user['to']){
-            $userRule = unserialize($user['rule']);
-            foreach($userRule as $rule){
-                if(_checkTimeInCondition($rule['from'], $rule['to'], $time)){
-                    return $price * $rule['value'] / 100;
-                }
-            }
-        }
+function _checkTimeInCondition($current){
+    $time_current = date("H:i:s",strtotime($current));
+    if($time_current >= '08:00:00' && $time_current <= '17:45:00'){
+        return 1;
     }
-    return 0;
-}
-
-function _checkTimeInCondition($from, $to, $current){
-    $from = strtotime($from);
-    $to = strtotime($to);
-    $current = strtotime(date("H:i:s",strtotime($current)));
-    if($to < $from){
-        $to = $to + 86400;
-        if($current < $from){
-            $current = $current + 86400;
-        }
+    if($time_current >= '17:46:00' && $time_current <= '22:30:00'){
+        return 2;
     }
-    if($from <= $current && $current <= $to){
-        return true;
-    }
-    return false;
+    return 3;
 }
 
 
