@@ -75,10 +75,10 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                                 return;
                             }
                             if($note['refund'] > 0){
-                                $maxPercentage =- $note['refund'];
+                                $maxPercentage -= $note['refund'];
                             }
                             if($note['sale_percentage'] > 0){
-                                $maxPercentage =- $note['sale_percentage'];
+                                $maxPercentage -= $note['sale_percentage'];
                             }
                         }
                     }
@@ -124,10 +124,10 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                         if($noteData = $checkNote->getData()){
                             foreach($noteData as $note){
                                 if($note['refund'] > 0){
-                                    $maxPercentage =- $note['refund'];
+                                    $maxPercentage -= $note['refund'];
                                 }
                                 if($note['sale_percentage'] > 0){
-                                    $maxPercentage =- $note['sale_percentage'];
+                                    $maxPercentage -= $note['sale_percentage'];
                                 }
                             }
                         }

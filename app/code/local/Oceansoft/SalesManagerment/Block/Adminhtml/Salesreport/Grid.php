@@ -22,7 +22,6 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Salesreport_Grid extends Mage_A
         if (is_string($filter)) {
             $data = Mage::helper('adminhtml')->prepareFilterString($filter);
         }
-
         if (isset($data['month']) && isset($data['year'])) {
             $collection->addFieldToFilter('main_table.order_date', array(
                 'from'  => $data['year'] . '-' . $data['month'] . '-01',
