@@ -44,4 +44,13 @@ class Oceansoft_SalesManagerment_Helper_Data extends Mage_Core_Helper_Abstract
         return $user->getUsername();
     }
 
+    public function getUserIdByName($user_name){
+        $user = Mage::getModel('admin/user')->getCollection()
+            ->addFieldToFilter('username', $user_name);
+        if($userData = $user->getData()){
+            return $userData[0]['user_id'];
+        }
+        return false;
+    }
+
 }

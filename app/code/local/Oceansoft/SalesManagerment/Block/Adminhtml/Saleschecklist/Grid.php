@@ -105,6 +105,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
             array(
                 'header'=> $this->__('User'),
                 'renderer'  => 'salesmanagerment/adminhtml_saleschecklist_render_user',
+                'filter_condition_callback' => array($this, '_customUserFilter'),
             )
         );
 
@@ -120,6 +121,15 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Grid extends Mag
         $locale = Mage::app()->getLocale();
         $date = $locale->date( $value, $locale->getDateFormat(), $locale->getLocaleCode(), false )->toString( $locale->getDateFormat() ) ;
         return $date;
+    }
+
+    protected function _customUserFilter($collection, $column){
+        if (!$value = $column->getFilter()->getValue()){
+            return $this;
+        }
+        $user_id = Mage::helper('salesmanagerment')->getUserIdByName($value);
+        $this->getCollection()->addFieldToFilter("user", $user_id);
+        return $this;
     }
 
     public function getRowUrl($row)
