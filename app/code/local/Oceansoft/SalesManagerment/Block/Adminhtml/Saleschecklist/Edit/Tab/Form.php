@@ -9,14 +9,25 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
-        $fieldset->addField('order_date', 'date',
-            array(
-                'label'     => 'Order Date',
-                'required'  => true,
-                'name'      => 'order_date',
-                'format' => 'yyyy-MM-dd',
-                'image'     => $this->getSkinUrl('images/grid-cal.gif')
-            ));
+        if (Mage::registry('salesmanagerment_data')->getId()) {
+            $fieldset->addField('order_date', 'date',
+                array(
+                    'label'     => 'Order Date',
+                    'required'  => true,
+                    'name'      => 'order_date',
+                    'format' => 'yyyy-MM-dd',
+                    'disabled' => true,
+                ));
+        }else{
+            $fieldset->addField('order_date', 'date',
+                array(
+                    'label'     => 'Order Date',
+                    'required'  => true,
+                    'name'      => 'order_date',
+                    'format' => 'yyyy-MM-dd',
+                    'image'     => $this->getSkinUrl('images/grid-cal.gif')
+                ));
+        }
         $fieldset->addField('shift', 'select',
             array(
                 'label' => 'Shift',
