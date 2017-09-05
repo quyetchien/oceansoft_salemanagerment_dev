@@ -4,30 +4,35 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
 {
     protected function _prepareForm()
     {
+        $user_id = 0;
+        $session = Mage::getSingleton('admin/session');
+        if($user = $session->getUser()){
+            $user_id = $user->getUserId();
+        }
         $form = new Varien_Data_Form();
         $this->setForm($form);
         $fieldset = $form->addFieldset('salesmanagerment_form',
             array('legend'=>'General Information'));
 
-        if (Mage::registry('salesmanagerment_data')->getId()) {
-            $fieldset->addField('order_date', 'date',
-                array(
-                    'label'     => 'Order Date',
-                    'required'  => true,
-                    'name'      => 'order_date',
-                    'format' => 'yyyy-MM-dd',
-                    'disabled' => true,
-                ));
-        }else{
-            $fieldset->addField('order_date', 'date',
-                array(
-                    'label'     => 'Order Date',
-                    'required'  => true,
-                    'name'      => 'order_date',
-                    'format' => 'yyyy-MM-dd',
-                    'image'     => $this->getSkinUrl('images/grid-cal.gif')
-                ));
-        }
+//        if (Mage::registry('salesmanagerment_data')->getId()) {
+//            $fieldset->addField('order_date', 'date',
+//                array(
+//                    'label'     => 'Order Date',
+//                    'required'  => true,
+//                    'name'      => 'order_date',
+//                    'format' => 'yyyy-MM-dd',
+//                    'disabled' => true,
+//                ));
+//        }else{
+//            $fieldset->addField('order_date', 'date',
+//                array(
+//                    'label'     => 'Order Date',
+//                    'required'  => true,
+//                    'name'      => 'order_date',
+//                    'format' => 'yyyy-MM-dd',
+//                    'image'     => $this->getSkinUrl('images/grid-cal.gif')
+//                ));
+//        }
         $fieldset->addField('shift', 'select',
             array(
                 'label' => 'Shift',
@@ -63,19 +68,37 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
                 'required' => false,
                 'name' => 'note',
             ));
-        $fieldset->addField('refund', 'select',
-            array(
-                'label' => 'Refunded',
-                'required' => false,
-                'name' => 'refund',
-                'values' => $this->_listPercentage(true),
-            ));
-        $fieldset->addField('refund_reason', 'textarea',
-            array(
-                'label' => 'Refund Reason',
-                'required' => false,
-                'name' => 'refund_reason',
-            ));
+        if(Mage::helper('salesmanagerment')->checkIsAdminUser($user_id)){
+            $fieldset->addField('refund', 'select',
+                array(
+                    'label' => 'Refunded',
+                    'required' => false,
+                    'name' => 'refund',
+                    'values' => $this->_listPercentage(true),
+                ));
+            $fieldset->addField('refund_reason', 'textarea',
+                array(
+                    'label' => 'Refund Reason',
+                    'required' => false,
+                    'name' => 'refund_reason',
+                ));
+        }else{
+            $fieldset->addField('refund', 'select',
+                array(
+                    'label' => 'Refunded',
+                    'required' => false,
+                    'name' => 'refund',
+                    'values' => $this->_listPercentage(true),
+                    'disabled' => true,
+                ));
+            $fieldset->addField('refund_reason', 'textarea',
+                array(
+                    'label' => 'Refund Reason',
+                    'required' => false,
+                    'name' => 'refund_reason',
+                    'disabled' => true,
+                ));
+        }
 
         if ( Mage::registry('salesmanagerment_data') )
         {
@@ -90,7 +113,7 @@ class Oceansoft_SalesManagerment_Block_Adminhtml_Saleschecklist_Edit_Tab_Form ex
         if($emptyValue){
             $result[0] = '';
         }
-        $i = 10;
+        $i = 0;
         while ($i <= 100){
             $result[$i] = $i . '%';
             $i = $i + 10;

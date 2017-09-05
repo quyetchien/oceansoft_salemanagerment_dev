@@ -55,6 +55,12 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
         if ($this->getRequest()->getPost()) {
             try {
                 $postData = $this->getRequest()->getPost();
+                if(!isset($postData['refund'])){
+                    $postData['refund'] = 0;
+                }
+                if(!isset($postData['refund_reason'])){
+                    $postData['refund_reason'] = '';
+                }
                 $checkListModel = Mage::getModel('salesmanagerment/checklist');
                 $checkListCollection = $checkListModel->getCollection();
                 $checklist_id = $this->getRequest()->getParam('id');
@@ -66,6 +72,7 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                 if ($checklist_id <= 0) {
                     // check percentage
                     $maxPercentage = 100;
+                    $refund = 0;
                     $checkNote = $checkListCollection
                         ->addFieldToFilter('order_id', $postData['order_id']);
                     if($noteData = $checkNote->getData()){
@@ -75,21 +82,25 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                                 return;
                             }
                             if($note['refund'] > 0){
-                                $maxPercentage -= $note['refund'];
+                                $refund = $note['refund'];
                             }
                             if($note['sale_percentage'] > 0){
                                 $maxPercentage -= $note['sale_percentage'];
                             }
                         }
                     }
+                    if($refund > 0){
+                        $postData['refund'] = $refund;
+                    }
                     if($postData['sale_percentage'] > $maxPercentage){
-                        $this->_errorResult('You can only fill form with: ' . $maxPercentage . '%');
+                        $this->_errorResult('You can only fill form with max percentage: ' . $maxPercentage . '%');
                         return;
                     }
                     // end check percentage
 
                     $order = Mage::getModel('sales/order')->loadByIncrementId($postData['order_id']);
                     if($order->getData()){
+                        $postData['order_date'] = $order->getCreatedAt();
                         $orderGrandTotal = $order->getGrandTotal();
                         if($postData['refund'] > 0){
                             $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
@@ -115,34 +126,45 @@ class Oceansoft_SalesManagerment_Adminhtml_Osmanage_SaleschecklistController ext
                 }else{
                     $order = Mage::getModel('sales/order')->loadByIncrementId($postData['order_id']);
                     if($order->getData()){
-                        // check percentage
+                        $postData['order_date'] = $order->getCreatedAt();
+                        $orderGrandTotal = $order->getGrandTotal();
+                        if($postData['refund'] > 0){
+                            $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
+                        }
                         $maxPercentage = 100;
                         $checkNote = $checkListCollection
                             ->addFieldToFilter('order_id', $postData['order_id'])
                             ->addFieldToFilter('id', array('neq' => $checklist_id));
 
+                        // Update All Order (refund, price, total_earn)
+                        if($postData['refund']){
+                            foreach($checkNote as $note){
+                                $salePrice = $orderGrandTotal * $note->getSalePercentage() / 100;
+                                $sale_total_earn = $this->_calculationEarnPrice($salePrice, $note->getOrderDate(), $note->getShift(), $note->getUser());
+                                $note->setRefund($postData['refund'])
+                                    ->setPrice($salePrice)
+                                    ->setTotalEarn($sale_total_earn)
+                                    ->save();
+                            }
+                        }
+                        // check percentage
                         if($noteData = $checkNote->getData()){
                             foreach($noteData as $note){
-                                if($note['refund'] > 0){
-                                    $maxPercentage -= $note['refund'];
-                                }
                                 if($note['sale_percentage'] > 0){
                                     $maxPercentage -= $note['sale_percentage'];
                                 }
                             }
                         }
                         if($postData['sale_percentage'] > $maxPercentage){
-                            $this->_errorResult('You can only fill form with: ' . $maxPercentage . '%');
+                            $this->_errorResult('You can only fill form with max percentage: ' . $maxPercentage . '%');
                             return;
                         }
                         // end check percentage
 
-                        $orderGrandTotal = $order->getGrandTotal();
-                        if($postData['refund'] > 0){
-                            $orderGrandTotal = $orderGrandTotal * (1 - ($postData['refund'] / 100));
-                        }
+                        //get my price and my total earn
+                        $noteUser = Mage::getModel('salesmanagerment/checklist')->load($checklist_id)->getUser();
                         $myPrice = $orderGrandTotal * $postData['sale_percentage'] / 100;
-                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['order_date'], $postData['shift'], $user_id);
+                        $total_earn = $this->_calculationEarnPrice($myPrice, $postData['order_date'], $postData['shift'], $noteUser);
 
                         // update oceansoft_sales_checklist
                         $checkListModel->load($checklist_id)->addData($postData)
